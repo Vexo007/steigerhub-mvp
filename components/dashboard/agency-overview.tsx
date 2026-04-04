@@ -83,6 +83,12 @@ export function AgencyOverview({
                           >
                             Open workspace
                           </Link>
+                          <Link
+                            href={`/agency/tenants/${tenant.id}/config`}
+                            className="rounded-full border border-ink/10 px-4 py-2 text-center text-sm font-semibold text-ink"
+                          >
+                            Beheer pakket
+                          </Link>
                           <StripeCheckoutButton tenantId={tenant.id} packageTier={tenant.packageTier} />
                         </div>
                       </td>
@@ -106,6 +112,12 @@ export function AgencyOverview({
           <p className="mt-1 text-sm text-ink/60">
             Houd onboarding bewust simpel in MVP: maak tenant, kies pakket, start Stripe-checkout.
           </p>
+          <Link
+            href="/agency/packages"
+            className="mt-4 inline-flex rounded-full border border-ink/10 px-4 py-2 text-sm font-semibold text-ink"
+          >
+            Beheer pakketten
+          </Link>
           <div className="mt-5">
             <TenantCreateForm />
           </div>

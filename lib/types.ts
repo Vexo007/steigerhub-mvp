@@ -103,3 +103,81 @@ export interface TenantWorkspaceData {
   fields: CustomFieldDefinition[];
   source: "mock" | "supabase";
 }
+
+export type DynamicFieldType = "text" | "textarea" | "number" | "date" | "select" | "checkbox" | "photo";
+
+export interface PackageDefinition {
+  id: string;
+  name: string;
+  niche: Niche;
+  description: string;
+  isTemplate: boolean;
+}
+
+export interface ModuleDefinition {
+  id: string;
+  packageId: string;
+  name: string;
+  slug: string;
+  sortOrder: number;
+  isEnabled: boolean;
+}
+
+export interface FormDefinition {
+  id: string;
+  moduleId: string;
+  name: string;
+  description: string;
+  sortOrder: number;
+}
+
+export interface FieldDefinition {
+  id: string;
+  formId: string;
+  label: string;
+  fieldKey: string;
+  type: DynamicFieldType;
+  required: boolean;
+  options: string[];
+  helpText: string;
+  sortOrder: number;
+}
+
+export interface DynamicRecord {
+  id: string;
+  tenantId: string;
+  projectId: string | null;
+  formId: string;
+  createdAt: string;
+  status: string;
+}
+
+export interface DynamicFieldValue {
+  id: string;
+  recordId: string;
+  fieldId: string;
+  value: unknown;
+}
+
+export interface ModuleBundle {
+  module: ModuleDefinition;
+  forms: Array<{
+    form: FormDefinition;
+    fields: FieldDefinition[];
+  }>;
+}
+
+export interface PackageWorkspaceData {
+  tenant: Tenant | null;
+  packageDefinition: PackageDefinition | null;
+  projects: Project[];
+  moduleBundles: ModuleBundle[];
+  recordsByFormId: Record<string, Array<{ record: DynamicRecord; values: DynamicFieldValue[] }>>;
+}
+
+export interface TenantConfigData {
+  tenant: Tenant | null;
+  packageDefinition: PackageDefinition | null;
+  packages: PackageDefinition[];
+  moduleBundles: ModuleBundle[];
+}

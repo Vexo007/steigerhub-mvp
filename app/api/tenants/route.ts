@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { clonePackageForTenant, getPackageDefinitions } from "@/lib/package-builder-data";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createTenantSchema } from "@/lib/validation";
 
@@ -93,7 +94,38 @@ export async function POST(request: Request) {
     );
   }
 
+  const templates = await getPackageDefinitions();
+  const preferredTemplateName =
+    parsed.data.packageTier === "starter"
+      ? "Steigerbouw Basic"
+      : parsed.data.packageTier === "pro"
+        ? "Steigerbouw Pro"
+        : "Steigerbouw Custom";
+  const template = templates.find((item) => item.isTemplate && item.name === preferredTemplateName);
+
+  if (template) {
+    try {
+      await clonePackageForTenant({
+        tenantId: tenant.id,
+        packageTemplateId: template.id,
+        tenantName: parsed.data.name
+      });
+    } catch (cloneError) {
+      return NextResponse.json(
+        {
+          error:
+            cloneError instanceof Error
+              ? cloneError.message
+              : "Tenant is aangemaakt, maar pakketkopie maken mislukte."
+        },
+        { status: 500 }
+      );
+    }
+  }
+
   revalidatePath("/agency");
+  revalidatePath("/agency/packages");
+  revalidatePath(`/agency/tenants/${tenant.id}/config`);
   revalidatePath(`/workspace?tenantId=${tenant.id}`);
 
   return NextResponse.json({
