@@ -88,3 +88,18 @@ export interface SubscriptionSummary {
   paymentState: "paid" | "past_due" | "trialing";
 }
 
+export interface AgencyDashboardData {
+  tenants: Tenant[];
+  subscriptions: SubscriptionSummary[];
+  source: "mock" | "supabase";
+}
+
+export interface TenantWorkspaceData {
+  tenant: Tenant | null;
+  projects: Project[];
+  projectFiles: ProjectFile[];
+  projectNotes: ProjectNote[];
+  modules: TenantModuleSetting[];
+  fields: CustomFieldDefinition[];
+  source: "mock" | "supabase";
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const packageDescriptions = {
@@ -9,10 +10,59 @@ const packageDescriptions = {
 } as const;
 
 export function TenantCreateForm() {
+  const router = useRouter();
   const [tier, setTier] = useState<keyof typeof packageDescriptions>("pro");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    const formData = new FormData(event.currentTarget);
+    const payload = {
+      name: String(formData.get("name") ?? ""),
+      contactEmail: String(formData.get("contactEmail") ?? ""),
+      contactName: String(formData.get("contactName") ?? ""),
+      packageTier: String(formData.get("packageTier") ?? "pro"),
+      niche: "steigerbouw"
+    };
+
+    try {
+      const response = await fetch("/api/tenants", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = (await response.json()) as {
+        error?: string;
+        message?: string;
+        data?: { id?: string };
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Tenant kon niet worden aangemaakt.");
+      }
+
+      setSuccess(result.message ?? "Tenant aangemaakt.");
+      event.currentTarget.reset();
+      setTier("pro");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Onbekende fout.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <form className="grid gap-4 md:grid-cols-2">
+    <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
       <label className="grid gap-2 text-sm text-ink/80">
         Bedrijfsnaam
         <input
@@ -57,11 +107,13 @@ export function TenantCreateForm() {
       </div>
       <button
         type="submit"
+        disabled={loading}
         className="rounded-full bg-rust px-5 py-3 text-sm font-semibold text-white transition hover:bg-rust/90 md:col-span-2"
       >
-        Tenant aanmaken
+        {loading ? "Bezig..." : "Tenant aanmaken"}
       </button>
+      {success ? <p className="text-sm text-emerald-700 md:col-span-2">{success}</p> : null}
+      {error ? <p className="text-sm text-rose-700 md:col-span-2">{error}</p> : null}
     </form>
   );
 }
-

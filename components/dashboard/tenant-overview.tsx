@@ -8,6 +8,7 @@ import type {
 } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { ProjectCreateForm } from "@/components/forms/project-create-form";
 import { Panel } from "@/components/ui/panel";
 
 export function TenantOverview({
@@ -119,6 +120,18 @@ export function TenantOverview({
           </div>
         </Panel>
 
+        <Panel>
+          <h2 className="text-xl font-semibold text-ink">Nieuw dossier / opdracht</h2>
+          <p className="mt-1 text-sm text-ink/60">
+            Maak hier een klantopdracht aan zodat het team materiaal, adres en voortgang kan bijhouden.
+          </p>
+          <div className="mt-5">
+            <ProjectCreateForm tenantId={tenant.id} />
+          </div>
+        </Panel>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <Panel>
           <h2 className="text-xl font-semibold text-ink">Tenant-configuratie</h2>
           <p className="mt-1 text-sm text-ink/60">

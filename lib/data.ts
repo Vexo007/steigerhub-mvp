@@ -1,12 +1,14 @@
 import { customFields, projectFiles, projectNotes, projects, subscriptions, tenantModules, tenants } from "@/lib/mock-data";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type {
+  AgencyDashboardData,
   CustomFieldDefinition,
   Project,
   ProjectFile,
   ProjectNote,
   SubscriptionSummary,
   Tenant,
+  TenantWorkspaceData,
   TenantModuleSetting
 } from "@/lib/types";
 
@@ -83,7 +85,7 @@ const packageAmounts = {
   plus: 249
 } as const;
 
-const liveDashboardsEnabled = process.env.ENABLE_LIVE_DASHBOARDS === "true";
+const liveDashboardsEnabled = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 async function withTimeout<T>(promise: PromiseLike<T> | Promise<T>, ms = 3000): Promise<T> {
   return await Promise.race([
@@ -176,7 +178,7 @@ function mapModule(row: ModuleRow): TenantModuleSetting {
   };
 }
 
-export async function getAgencyDashboardData() {
+export async function getAgencyDashboardData(): Promise<AgencyDashboardData> {
   if (!liveDashboardsEnabled) {
     return { tenants, subscriptions, source: "mock" as const };
   }
@@ -213,7 +215,7 @@ export async function getAgencyDashboardData() {
   }
 }
 
-export async function getTenantWorkspaceData(tenantId?: string) {
+export async function getTenantWorkspaceData(tenantId?: string): Promise<TenantWorkspaceData> {
   if (!liveDashboardsEnabled) {
     return {
       tenant: tenants[0] ?? null,
@@ -227,16 +229,19 @@ export async function getTenantWorkspaceData(tenantId?: string) {
   }
 
   const supabase = createSupabaseAdminClient();
-  const fallbackTenantId = tenantId ?? tenants[0]?.id;
+  const fallbackTenantId = tenantId || tenants[0]?.id;
 
   if (!supabase || !fallbackTenantId) {
+    const fallbackTenant =
+      tenantId && tenants.find((item) => item.id === tenantId) ? tenants.find((item) => item.id === tenantId)! : tenants[0] ?? null;
+
     return {
-      tenant: tenants[0] ?? null,
-      projects,
-      projectFiles,
-      projectNotes,
-      modules: tenantModules,
-      fields: customFields,
+      tenant: fallbackTenant,
+      projects: projects.filter((project) => !fallbackTenant || project.tenantId === fallbackTenant.id),
+      projectFiles: projectFiles.filter((file) => !fallbackTenant || file.tenantId === fallbackTenant.id),
+      projectNotes: projectNotes.filter((note) => !fallbackTenant || note.tenantId === fallbackTenant.id),
+      modules: tenantModules.filter((module) => !fallbackTenant || module.tenantId === fallbackTenant.id),
+      fields: customFields.filter((field) => !fallbackTenant || field.tenantId === fallbackTenant.id),
       source: "mock" as const
     };
   }
@@ -251,13 +256,16 @@ export async function getTenantWorkspaceData(tenantId?: string) {
         .single()
     );
   } catch {
+    const fallbackTenant =
+      tenantId && tenants.find((item) => item.id === tenantId) ? tenants.find((item) => item.id === tenantId)! : tenants[0] ?? null;
+
     return {
-      tenant: tenants[0] ?? null,
-      projects,
-      projectFiles,
-      projectNotes,
-      modules: tenantModules,
-      fields: customFields,
+      tenant: fallbackTenant,
+      projects: projects.filter((project) => !fallbackTenant || project.tenantId === fallbackTenant.id),
+      projectFiles: projectFiles.filter((file) => !fallbackTenant || file.tenantId === fallbackTenant.id),
+      projectNotes: projectNotes.filter((note) => !fallbackTenant || note.tenantId === fallbackTenant.id),
+      modules: tenantModules.filter((module) => !fallbackTenant || module.tenantId === fallbackTenant.id),
+      fields: customFields.filter((field) => !fallbackTenant || field.tenantId === fallbackTenant.id),
       source: "mock" as const
     };
   }
@@ -268,13 +276,16 @@ export async function getTenantWorkspaceData(tenantId?: string) {
   };
 
   if (tenantError || !tenantRow) {
+    const fallbackTenant =
+      tenantId && tenants.find((item) => item.id === tenantId) ? tenants.find((item) => item.id === tenantId)! : tenants[0] ?? null;
+
     return {
-      tenant: tenants[0] ?? null,
-      projects,
-      projectFiles,
-      projectNotes,
-      modules: tenantModules,
-      fields: customFields,
+      tenant: fallbackTenant,
+      projects: projects.filter((project) => !fallbackTenant || project.tenantId === fallbackTenant.id),
+      projectFiles: projectFiles.filter((file) => !fallbackTenant || file.tenantId === fallbackTenant.id),
+      projectNotes: projectNotes.filter((note) => !fallbackTenant || note.tenantId === fallbackTenant.id),
+      modules: tenantModules.filter((module) => !fallbackTenant || module.tenantId === fallbackTenant.id),
+      fields: customFields.filter((field) => !fallbackTenant || field.tenantId === fallbackTenant.id),
       source: "mock" as const
     };
   }
@@ -319,13 +330,16 @@ export async function getTenantWorkspaceData(tenantId?: string) {
       ])
     );
   } catch {
+    const fallbackTenant =
+      tenantId && tenants.find((item) => item.id === tenantId) ? tenants.find((item) => item.id === tenantId)! : tenants[0] ?? null;
+
     return {
-      tenant: tenants[0] ?? null,
-      projects,
-      projectFiles,
-      projectNotes,
-      modules: tenantModules,
-      fields: customFields,
+      tenant: fallbackTenant,
+      projects: projects.filter((project) => !fallbackTenant || project.tenantId === fallbackTenant.id),
+      projectFiles: projectFiles.filter((file) => !fallbackTenant || file.tenantId === fallbackTenant.id),
+      projectNotes: projectNotes.filter((note) => !fallbackTenant || note.tenantId === fallbackTenant.id),
+      modules: tenantModules.filter((module) => !fallbackTenant || module.tenantId === fallbackTenant.id),
+      fields: customFields.filter((field) => !fallbackTenant || field.tenantId === fallbackTenant.id),
       source: "mock" as const
     };
   }

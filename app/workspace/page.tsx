@@ -2,8 +2,13 @@ import Link from "next/link";
 import { TenantOverview } from "@/components/dashboard/tenant-overview";
 import { getTenantWorkspaceData } from "@/lib/data";
 
-export default async function WorkspacePage() {
-  const data = await getTenantWorkspaceData();
+export default async function WorkspacePage({
+  searchParams
+}: {
+  searchParams?: Promise<{ tenantId?: string }>;
+}) {
+  const params = (await searchParams) ?? {};
+  const data = await getTenantWorkspaceData(params.tenantId);
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8 lg:px-10">

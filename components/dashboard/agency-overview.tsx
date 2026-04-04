@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { SubscriptionSummary, Tenant } from "@/lib/types";
 import { euro, formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -75,7 +76,15 @@ export function AgencyOverview({
                         {subscription ? formatDate(subscription.nextBillingDate) : "Nog niet gekoppeld"}
                       </td>
                       <td className="py-4">
-                        <StripeCheckoutButton tenantId={tenant.id} packageTier={tenant.packageTier} />
+                        <div className="grid gap-2">
+                          <Link
+                            href={`/workspace?tenantId=${tenant.id}`}
+                            className="rounded-full border border-ink/10 px-4 py-2 text-center text-sm font-semibold text-ink"
+                          >
+                            Open workspace
+                          </Link>
+                          <StripeCheckoutButton tenantId={tenant.id} packageTier={tenant.packageTier} />
+                        </div>
                       </td>
                     </tr>
                   );
