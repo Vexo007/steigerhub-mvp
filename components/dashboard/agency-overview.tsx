@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import type { SubscriptionSummary, Tenant } from "@/lib/types";
 import { euro, formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +19,19 @@ export function AgencyOverview({
   subscriptions: SubscriptionSummary[];
   source: "mock" | "supabase";
 }) {
+  const [query, setQuery] = useState("");
+
+  const filteredTenants = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return tenants;
+    }
+
+    return tenants.filter((tenant) =>
+      [tenant.name, tenant.contactEmail, tenant.contactName].some((value) => value.toLowerCase().includes(normalizedQuery))
+    );
+  }, [query, tenants]);
+
   return (
     <div className="grid gap-6">
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -49,8 +65,20 @@ export function AgencyOverview({
             </div>
           </div>
           <p className="mt-3 text-sm text-ink/60">
-            Rustig overzicht van klanten, pakketstatus en billing-acties. Dit is de agency-kant zoals jij hem voor je ziet.
+            Rustig overzicht van klanten, pakketstatus en billing-acties. Zoek direct op klantnaam of e-mail.
           </p>
+
+          <div className="mt-5 max-w-md">
+            <label className="grid gap-2 text-sm text-ink/70">
+              Zoek klant
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Zoek op bedrijfsnaam of e-mail"
+                className="rounded-2xl border border-line bg-mist px-4 py-3 outline-none"
+              />
+            </label>
+          </div>
 
           <div className="mt-6 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
@@ -64,7 +92,7 @@ export function AgencyOverview({
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {tenants.map((tenant) => {
+                {filteredTenants.map((tenant) => {
                   const subscription = subscriptions.find((item) => item.tenantId === tenant.id);
                   return (
                     <tr key={tenant.id}>
@@ -105,10 +133,10 @@ export function AgencyOverview({
                     </tr>
                   );
                 })}
-                {tenants.length === 0 ? (
+                {filteredTenants.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-8 text-center text-ink/55">
-                      Nog geen tenants gevonden in Supabase.
+                      Geen klanten gevonden voor deze zoekopdracht.
                     </td>
                   </tr>
                 ) : null}
