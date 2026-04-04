@@ -10,6 +10,7 @@ import type {
   FormDefinition,
   ModuleBundle,
   ModuleDefinition,
+  PackageTemplateData,
   PackageDefinition,
   TenantAdminData,
   PackageWorkspaceData,
@@ -254,6 +255,54 @@ export async function getTenantConfigData(tenantId: string): Promise<TenantConfi
     tenant,
     packageDefinition,
     packages,
+    moduleBundles: buildModuleBundles(modules, forms, fields)
+  };
+}
+
+export async function getPackageTemplateData(packageId: string): Promise<PackageTemplateData> {
+  const supabase = createSupabaseAdminClient();
+
+  if (!supabase) {
+    return {
+      packageDefinition: null,
+      moduleBundles: []
+    };
+  }
+
+  const db = supabase as any;
+  const { data: packageRow } = await db.from("packages").select("id,name,niche,description,is_template").eq("id", packageId).single();
+
+  if (!packageRow) {
+    return {
+      packageDefinition: null,
+      moduleBundles: []
+    };
+  }
+
+  const packageDefinition = mapPackage(packageRow as PackageRow);
+  const { data: moduleRows } = await db
+    .from("package_modules")
+    .select("id,package_id,name,slug,sort_order,is_enabled")
+    .eq("package_id", packageId);
+
+  const modules = ((moduleRows ?? []) as ModuleRow[]).map(mapModule);
+  const moduleIds = modules.map((module) => module.id);
+  const { data: formsData } = moduleIds.length
+    ? await db.from("module_forms").select("id,module_id,name,description,sort_order").in("module_id", moduleIds)
+    : { data: [] };
+  const forms = ((formsData ?? []) as FormRow[]).map(mapForm);
+
+  const formIds = forms.map((form) => form.id);
+  const { data: fieldsData } = formIds.length
+    ? await db
+        .from("form_fields")
+        .select("id,form_id,label,field_key,type,required,options,help_text,sort_order")
+        .in("form_id", formIds)
+    : { data: [] };
+  const fields = ((fieldsData ?? []) as FieldRow[]).map(mapField);
+
+  return {
+    packageDefinition,
     moduleBundles: buildModuleBundles(modules, forms, fields)
   };
 }

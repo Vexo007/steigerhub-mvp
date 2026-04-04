@@ -17,7 +17,7 @@ export function LogoutButton() {
     <button
       type="button"
       onClick={handleLogout}
-      className="rounded-full border border-ink/10 px-4 py-2 text-sm text-ink"
+      className="rounded-full border border-ink/10 px-4 py-2 text-sm font-medium text-ink transition"
     >
       Uitloggen
     </button>

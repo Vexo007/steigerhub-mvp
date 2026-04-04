@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { EmployeeCreateForm } from "@/components/forms/employee-create-form";
 import { ProjectCreateForm } from "@/components/forms/project-create-form";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +18,20 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
       </Panel>
     );
   }
+
+  const tenant = data.tenant;
+
+  const [projectQuery, setProjectQuery] = useState("");
+  const filteredProjects = useMemo(() => {
+    const normalized = projectQuery.trim().toLowerCase();
+    if (!normalized) {
+      return data.projects;
+    }
+
+    return data.projects.filter((project) =>
+      [project.clientName, project.siteAddress, project.siteCity].some((value) => value.toLowerCase().includes(normalized))
+    );
+  }, [data.projects, projectQuery]);
 
   return (
     <div className="grid gap-6">
@@ -38,7 +55,7 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
             De bedrijfsadmin maakt projecten aan. Daarna vullen werknemers en managers de formulieren binnen dat project in.
           </p>
           <div className="mt-5">
-            <ProjectCreateForm tenantId={data.tenant.id} />
+            <ProjectCreateForm tenantId={tenant.id} />
           </div>
         </Panel>
 
@@ -55,15 +72,11 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
           <div className="mt-5 grid gap-4">
             <div className="rounded-[22px] border border-line bg-mist/60 p-5">
               <p className="text-sm font-semibold text-forest">Kleuren en logo</p>
-              <p className="mt-2 text-sm text-ink/60">
-                Hier kan de eigenaar straks eigen kleuren, logo en uitstraling van zijn bedrijfsomgeving beheren.
-              </p>
+              <p className="mt-2 text-sm text-ink/60">Beheer hier de uitstraling van het bedrijfsaccount en de werkapp.</p>
             </div>
             <div className="rounded-[22px] border border-line bg-mist/60 p-5">
-              <p className="text-sm font-semibold text-forest">RI&E, contracten en certificaten</p>
-              <p className="mt-2 text-sm text-ink/60">
-                Centrale plek voor bedrijfsdocumenten, veiligheidsdossiers en certificaten.
-              </p>
+              <p className="text-sm font-semibold text-forest">Bedrijfsdocumenten</p>
+              <p className="mt-2 text-sm text-ink/60">Centrale plek voor RI&E, contracten, certificaten en andere documenten.</p>
             </div>
           </div>
         </Panel>
@@ -73,9 +86,7 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
         <Panel>
           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Gebruikers</p>
           <h3 className="mt-2 text-2xl font-semibold text-forest">Werknemers beheren</h3>
-          <p className="mt-2 text-sm text-ink/60">
-            De werkgever maakt hier werknemers en managers aan voor zijn eigen bedrijf.
-          </p>
+          <p className="mt-2 text-sm text-ink/60">De werkgever maakt hier werknemers en managers aan voor zijn eigen bedrijf.</p>
           <div className="mt-5">
             <EmployeeCreateForm />
           </div>
@@ -99,13 +110,24 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
         <Panel>
           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Projecten</p>
           <h3 className="mt-2 text-2xl font-semibold text-forest">Alle klantprojecten</h3>
+          <div className="mt-4 max-w-md">
+            <label className="grid gap-2 text-sm text-ink/70">
+              Zoek project
+              <input
+                value={projectQuery}
+                onChange={(event) => setProjectQuery(event.target.value)}
+                placeholder="Zoek op bedrijfsnaam, adres of plaats"
+                className="rounded-2xl border border-line bg-mist px-4 py-3 outline-none"
+              />
+            </label>
+          </div>
           <div className="mt-5 grid gap-3">
-            {data.projects.length === 0 ? (
+            {filteredProjects.length === 0 ? (
               <div className="rounded-[20px] border border-line bg-mist/60 px-4 py-4 text-sm text-ink/60">
-                Nog geen projecten aangemaakt.
+                Geen projecten gevonden.
               </div>
             ) : (
-              data.projects.map((project) => (
+              filteredProjects.map((project) => (
                 <div key={project.id} className="rounded-[20px] border border-line bg-mist/60 px-4 py-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -116,9 +138,15 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
                     </div>
                     <Badge tone={project.safetyStatus}>{project.safetyStatus}</Badge>
                   </div>
-                  <p className="mt-2 text-sm text-ink/60">
-                    Start: {formatDate(project.startDate)} · Status: {project.status}
-                  </p>
+                  <p className="mt-2 text-sm text-ink/60">Start: {formatDate(project.startDate)} · Status: {project.status}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Link
+                      href={`/workspace?tenantId=${tenant.id}&projectId=${project.id}`}
+                      className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink"
+                    >
+                      Open project
+                    </Link>
+                  </div>
                 </div>
               ))
             )}

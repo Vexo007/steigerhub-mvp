@@ -9,7 +9,7 @@ export function ModuleToggleButton({
   isEnabled
 }: {
   moduleId: string;
-  tenantId: string;
+  tenantId?: string;
   isEnabled: boolean;
 }) {
   const router = useRouter();
@@ -37,4 +37,3 @@ export function ModuleToggleButton({
     </button>
   );
 }
-

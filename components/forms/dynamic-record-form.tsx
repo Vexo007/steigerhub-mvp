@@ -8,12 +8,14 @@ export function DynamicRecordForm({
   tenantId,
   form,
   fields,
-  projects
+  projects,
+  selectedProjectId
 }: {
   tenantId: string;
   form: FormDefinition;
   fields: FieldDefinition[];
   projects: Project[];
+  selectedProjectId?: string | null;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -54,7 +56,11 @@ export function DynamicRecordForm({
       </div>
       <label className="grid gap-2 text-sm text-ink/80">
         Koppel aan project
-        <select name="projectId" className="rounded-2xl border border-ink/10 bg-mist px-4 py-3 outline-none">
+        <select
+          name="projectId"
+          defaultValue={selectedProjectId ?? ""}
+          className="rounded-2xl border border-ink/10 bg-mist px-4 py-3 outline-none"
+        >
           <option value="">Geen project</option>
           {projects.map((project) => (
             <option key={project.id} value={project.id}>
@@ -146,4 +152,3 @@ export function DynamicRecordForm({
     </form>
   );
 }
-

@@ -5,7 +5,7 @@ import { useState } from "react";
 
 const fieldTypes = ["text", "textarea", "number", "date", "select", "checkbox", "photo"] as const;
 
-export function FieldCreateForm({ formId, tenantId }: { formId: string; tenantId: string }) {
+export function FieldCreateForm({ formId, tenantId }: { formId: string; tenantId?: string }) {
   const router = useRouter();
   const [type, setType] = useState<(typeof fieldTypes)[number]>("text");
   const [loading, setLoading] = useState(false);
@@ -84,4 +84,3 @@ export function FieldCreateForm({ formId, tenantId }: { formId: string; tenantId
     </form>
   );
 }
-

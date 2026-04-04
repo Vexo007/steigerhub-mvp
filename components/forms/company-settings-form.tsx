@@ -27,9 +27,7 @@ export function CompanySettingsForm({
       tenantId,
       displayName: String(formData.get("displayName") ?? ""),
       primaryColor: String(formData.get("primaryColor") ?? "#0a331c"),
-      secondaryColor: String(formData.get("secondaryColor") ?? "#49a642"),
-      rieNotes: String(formData.get("rieNotes") ?? ""),
-      companyNotes: String(formData.get("companyNotes") ?? "")
+      secondaryColor: String(formData.get("secondaryColor") ?? "#49a642")
     };
 
     try {
@@ -68,39 +66,37 @@ export function CompanySettingsForm({
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-2 text-sm text-ink/80">
           Primaire kleur
-          <input
-            type="color"
-            name="primaryColor"
-            defaultValue={initialProfile?.primaryColor ?? "#0a331c"}
-            className="h-14 w-full rounded-2xl border border-line bg-mist px-3 py-2 outline-none"
-          />
+          <div className="flex items-center gap-3">
+            <span
+              className="h-11 w-11 rounded-2xl border border-line"
+              style={{ backgroundColor: initialProfile?.primaryColor ?? "#0a331c" }}
+            />
+            <input
+              name="primaryColor"
+              defaultValue={initialProfile?.primaryColor ?? "#0a331c"}
+              className="flex-1 rounded-2xl border border-line bg-mist px-4 py-3 font-mono uppercase outline-none"
+              pattern="^#([A-Fa-f0-9]{6})$"
+              placeholder="#0A331C"
+            />
+          </div>
         </label>
         <label className="grid gap-2 text-sm text-ink/80">
           Secundaire kleur
-          <input
-            type="color"
-            name="secondaryColor"
-            defaultValue={initialProfile?.secondaryColor ?? "#49a642"}
-            className="h-14 w-full rounded-2xl border border-line bg-mist px-3 py-2 outline-none"
-          />
+          <div className="flex items-center gap-3">
+            <span
+              className="h-11 w-11 rounded-2xl border border-line"
+              style={{ backgroundColor: initialProfile?.secondaryColor ?? "#49a642" }}
+            />
+            <input
+              name="secondaryColor"
+              defaultValue={initialProfile?.secondaryColor ?? "#49a642"}
+              className="flex-1 rounded-2xl border border-line bg-mist px-4 py-3 font-mono uppercase outline-none"
+              pattern="^#([A-Fa-f0-9]{6})$"
+              placeholder="#49A642"
+            />
+          </div>
         </label>
       </div>
-      <label className="grid gap-2 text-sm text-ink/80">
-        RI&E notities
-        <textarea
-          name="rieNotes"
-          defaultValue={initialProfile?.rieNotes ?? ""}
-          className="min-h-28 rounded-2xl border border-line bg-mist px-4 py-3 outline-none"
-        />
-      </label>
-      <label className="grid gap-2 text-sm text-ink/80">
-        Algemene bedrijfsnotities
-        <textarea
-          name="companyNotes"
-          defaultValue={initialProfile?.companyNotes ?? ""}
-          className="min-h-28 rounded-2xl border border-line bg-mist px-4 py-3 outline-none"
-        />
-      </label>
       <button type="submit" disabled={loading} className="rounded-full bg-lime px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">
         {loading ? "Opslaan..." : "Company settings opslaan"}
       </button>

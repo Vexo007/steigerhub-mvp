@@ -219,6 +219,11 @@ export interface TenantConfigData {
   moduleBundles: ModuleBundle[];
 }
 
+export interface PackageTemplateData {
+  packageDefinition: PackageDefinition | null;
+  moduleBundles: ModuleBundle[];
+}
+
 export interface TenantAdminData {
   tenant: Tenant | null;
   packageDefinition: PackageDefinition | null;

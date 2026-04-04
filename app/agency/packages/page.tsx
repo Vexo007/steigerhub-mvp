@@ -41,6 +41,14 @@ export default async function AgencyPackagesPage() {
                 </p>
                 <h3 className="mt-2 text-xl font-semibold text-forest">{item.name}</h3>
                 <p className="mt-2 max-w-2xl text-sm text-ink/65">{item.description || "Geen omschrijving."}</p>
+                <div className="mt-4">
+                  <Link
+                    href={`/agency/packages/${item.id}`}
+                    className="inline-flex rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink"
+                  >
+                    Template bewerken
+                  </Link>
+                </div>
               </article>
             ))}
           </div>

@@ -9,7 +9,7 @@ import { getPackageWorkspaceData } from "@/lib/package-builder-data";
 export default async function WorkspacePage({
   searchParams
 }: {
-  searchParams?: Promise<{ tenantId?: string }>;
+  searchParams?: Promise<{ tenantId?: string; projectId?: string }>;
 }) {
   const params = (await searchParams) ?? {};
   const user = await requireAppUser();
@@ -40,7 +40,7 @@ export default async function WorkspacePage({
         </>
       }
     >
-      <PackageWorkspace data={data} />
+      <PackageWorkspace data={data} selectedProjectId={params.projectId ?? null} />
     </DashboardShell>
   );
 }

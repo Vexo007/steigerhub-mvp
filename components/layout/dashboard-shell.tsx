@@ -53,18 +53,18 @@ export function DashboardShell({
                 key={item.href}
                 href={item.href as Route}
                 className={`rounded-[18px] px-4 py-3 transition ${
-                  item.active ? "bg-white text-forest shadow-soft" : "text-white/72 hover:bg-white/8 hover:text-white"
+                  item.active ? "bg-white text-forest shadow-soft" : "text-white/88 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <div className="text-sm font-semibold">{item.label}</div>
-                {item.caption ? (
-                  <div className={`mt-1 text-xs ${item.active ? "text-forest/65" : "text-white/48"}`}>{item.caption}</div>
-                ) : null}
+                {item.caption ? <div className={`mt-1 text-xs ${item.active ? "text-forest/65" : "text-white/70"}`}>{item.caption}</div> : null}
               </Link>
             ))}
           </nav>
 
-          <div className="mt-8 hidden lg:block">{actions}</div>
+          <div className="mt-8 hidden gap-3 lg:grid [&_a]:justify-center [&_a]:border-white/25 [&_a]:text-white [&_a:hover]:bg-white/10 [&_button]:justify-center [&_button]:border-white/25 [&_button]:text-white [&_button:hover]:bg-white/10">
+            {actions}
+          </div>
         </aside>
 
         <div className="flex-1 px-4 py-4 lg:px-8 lg:py-6">

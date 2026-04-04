@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function FormCreateForm({ moduleId, tenantId }: { moduleId: string; tenantId: string }) {
+export function FormCreateForm({ moduleId, tenantId }: { moduleId: string; tenantId?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -49,4 +49,3 @@ export function FormCreateForm({ moduleId, tenantId }: { moduleId: string; tenan
     </form>
   );
 }
-

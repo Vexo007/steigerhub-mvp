@@ -23,8 +23,6 @@ export async function POST(request: Request) {
     displayName?: string;
     primaryColor?: string;
     secondaryColor?: string;
-    rieNotes?: string;
-    companyNotes?: string;
   };
 
   const tenantId = getAuthorizedTenantId(actor, body.tenantId) ?? actor.tenantId;
@@ -38,8 +36,8 @@ export async function POST(request: Request) {
     display_name: body.displayName ?? "",
     primary_color: body.primaryColor ?? "#0a331c",
     secondary_color: body.secondaryColor ?? "#49a642",
-    rie_notes: body.rieNotes ?? "",
-    company_notes: body.companyNotes ?? ""
+    rie_notes: "",
+    company_notes: ""
   });
 
   if (error) {

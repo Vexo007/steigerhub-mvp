@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function ModuleCreateForm({ packageId, tenantId }: { packageId: string; tenantId: string }) {
+export function ModuleCreateForm({ packageId, tenantId }: { packageId: string; tenantId?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -50,4 +50,3 @@ export function ModuleCreateForm({ packageId, tenantId }: { packageId: string; t
     </form>
   );
 }
-
