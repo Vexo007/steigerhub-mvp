@@ -21,10 +21,12 @@ function sectionCompletion(section: ProjectWorkplanSection | null | undefined) {
 
 export function WorkplanDetailShell({
   workplanId,
-  sections
+  sections,
+  projectDefaults
 }: {
   workplanId: string;
   sections: ProjectWorkplanSection[];
+  projectDefaults?: Record<string, string>;
 }) {
   const [activeSection, setActiveSection] = useState<WorkplanSectionKey>("algemeen");
 
@@ -105,6 +107,7 @@ export function WorkplanDetailShell({
             sectionKey={current.key}
             title={current.title}
             initialSection={initialSection}
+            projectDefaults={projectDefaults}
             onPrevious={activeIndex > 0 ? () => setActiveSection(workplanSections[activeIndex - 1].key) : undefined}
             onNext={activeIndex < workplanSections.length - 1 ? () => setActiveSection(workplanSections[activeIndex + 1].key) : undefined}
             canGoPrevious={activeIndex > 0}

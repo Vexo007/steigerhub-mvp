@@ -2,11 +2,16 @@ import Link from "next/link";
 import type { Route } from "next";
 import type { ReactNode } from "react";
 
-type NavItem = {
+export type DashboardNavItem = {
   label: string;
   href: string;
   active?: boolean;
   caption?: string;
+};
+
+export type DashboardNavSection = {
+  title?: string;
+  items: DashboardNavItem[];
 };
 
 export function DashboardShell({
@@ -15,6 +20,7 @@ export function DashboardShell({
   title,
   subtitle,
   navItems,
+  navSections,
   actions,
   children
 }: {
@@ -22,10 +28,18 @@ export function DashboardShell({
   brand: string;
   title: string;
   subtitle?: string;
-  navItems: NavItem[];
+  navItems?: DashboardNavItem[];
+  navSections?: DashboardNavSection[];
   actions?: ReactNode;
   children: ReactNode;
 }) {
+  const resolvedSections =
+    navSections && navSections.length > 0
+      ? navSections
+      : navItems
+        ? [{ items: navItems }]
+        : [];
+
   return (
     <div className="min-h-screen bg-canvas">
       <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col lg:flex-row">
@@ -47,18 +61,27 @@ export function DashboardShell({
             Duidelijke software voor agency, bedrijf en werkvloer. Rustig, snel en mobielvriendelijk.
           </div>
 
-          <nav className="mt-5 grid gap-2 lg:mt-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href as Route}
-                className={`rounded-[18px] px-4 py-3 transition ${
-                  item.active ? "bg-white text-forest shadow-soft" : "text-white/88 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <div className="text-sm font-semibold">{item.label}</div>
-                {item.caption ? <div className={`mt-1 text-xs ${item.active ? "text-forest/65" : "text-white/70"}`}>{item.caption}</div> : null}
-              </Link>
+          <nav className="mt-5 grid gap-5 lg:mt-8">
+            {resolvedSections.map((section) => (
+              <div key={section.title ?? section.items.map((item) => item.href).join("|")} className="grid gap-2">
+                {section.title ? (
+                  <p className="px-1 text-[11px] font-bold uppercase tracking-[0.24em] text-white/42">{section.title}</p>
+                ) : null}
+                {section.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href as Route}
+                    className={`rounded-[18px] px-4 py-3 transition ${
+                      item.active ? "bg-white text-forest shadow-soft" : "text-white/88 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    <div className="text-sm font-semibold">{item.label}</div>
+                    {item.caption ? (
+                      <div className={`mt-1 text-xs ${item.active ? "text-forest/65" : "text-white/70"}`}>{item.caption}</div>
+                    ) : null}
+                  </Link>
+                ))}
+              </div>
             ))}
           </nav>
 

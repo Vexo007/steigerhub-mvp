@@ -1,7 +1,5 @@
-import Link from "next/link";
-import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { AdminDashboardShell } from "@/components/layout/admin-dashboard-shell";
 import { TenantAdminOverview } from "@/components/dashboard/tenant-admin-overview";
-import { LogoutButton } from "@/components/forms/logout-button";
 import { getAuthorizedTenantId, requireAppUser } from "@/lib/auth";
 import { getTenantAdminData } from "@/lib/package-builder-data";
 
@@ -23,28 +21,15 @@ export default async function AdminPage({
   const data = await getTenantAdminData(tenantId ?? undefined);
 
   return (
-    <DashboardShell
-      roleLabel={user.role === "agency_admin" ? "Agency als klant" : "Bedrijfsadmin"}
-      brand={data.tenant?.name ?? "SteigerHub"}
+    <AdminDashboardShell
+      user={user}
+      tenant={data.tenant}
+      tenantId={tenantId ?? undefined}
+      currentKey="overview"
       title="Admin dashboard"
-      subtitle="Beheer je bedrijf, medewerkers en zie welke werknemer welk formulier heeft ingevuld."
-      navItems={[
-        { label: "Overzicht", href: tenantId ? `/admin?tenantId=${tenantId}` : "/admin", active: true, caption: "Bedrijf en team" },
-        { label: "Company settings", href: tenantId ? `/admin/settings/company?tenantId=${tenantId}` : "/admin/settings/company", caption: "Logo en documenten" },
-        { label: "Werkapp", href: tenantId ? `/workspace?tenantId=${tenantId}` : "/workspace", caption: "Werknemer weergave" }
-      ]}
-      actions={
-        <>
-          {user.role === "agency_admin" ? (
-            <Link href="/agency" className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
-              Terug naar agency
-            </Link>
-          ) : null}
-          <LogoutButton />
-        </>
-      }
+      subtitle="Beheer hier projecten, klanten, medewerkers en alle bedrijfsinstellingen van deze steigerbouwer."
     >
-      <TenantAdminOverview data={data} />
-    </DashboardShell>
+      <TenantAdminOverview data={data} tenantId={tenantId ?? undefined} />
+    </AdminDashboardShell>
   );
 }

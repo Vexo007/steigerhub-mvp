@@ -15,6 +15,7 @@ export function WorkplanSectionForm({
   sectionKey,
   title,
   initialSection,
+  projectDefaults,
   onPrevious,
   onNext,
   canGoPrevious,
@@ -24,6 +25,7 @@ export function WorkplanSectionForm({
   sectionKey: WorkplanSectionKey;
   title: string;
   initialSection?: ProjectWorkplanSection | null;
+  projectDefaults?: Record<string, string>;
   onPrevious?: () => void;
   onNext?: () => void;
   canGoPrevious?: boolean;
@@ -33,6 +35,7 @@ export function WorkplanSectionForm({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [submitMode, setSubmitMode] = useState<"save" | "next">("save");
   const payload = initialSection?.payload ?? {};
   const fields = getWorkplanSectionFields(sectionKey);
 
@@ -54,7 +57,7 @@ export function WorkplanSectionForm({
     const formData = new FormData(event.currentTarget);
     const values: Record<string, unknown> = {};
     fields.forEach((field) => {
-      values[field.key] = String(formData.get(field.key) ?? "");
+      values[field.key] = String(formData.get(field.key) ?? projectDefaults?.[field.key] ?? "");
     });
 
     const response = await fetch(`/api/workplans/${workplanId}/sections`, {
@@ -77,6 +80,10 @@ export function WorkplanSectionForm({
     setMessage("Sectie opgeslagen.");
     router.refresh();
     setLoading(false);
+
+    if (submitMode === "next" && canGoNext) {
+      onNext?.();
+    }
   }
 
   if (sectionKey === "genereren") {
@@ -120,7 +127,7 @@ export function WorkplanSectionForm({
                   {field.label}
                   <textarea
                     name={field.key}
-                    defaultValue={getInitialValue(payload, field.key)}
+                    defaultValue={getInitialValue(payload, field.key) || projectDefaults?.[field.key] || ""}
                     placeholder={field.placeholder}
                     className="min-h-28 rounded-2xl border border-line bg-white px-4 py-3 outline-none"
                   />
@@ -131,7 +138,7 @@ export function WorkplanSectionForm({
                   <input
                     type={field.type === "date" ? "date" : "text"}
                     name={field.key}
-                    defaultValue={getInitialValue(payload, field.key)}
+                    defaultValue={getInitialValue(payload, field.key) || projectDefaults?.[field.key] || ""}
                     placeholder={field.placeholder}
                     className="rounded-2xl border border-line bg-white px-4 py-3 outline-none"
                   />
@@ -151,12 +158,17 @@ export function WorkplanSectionForm({
         >
           Vorige
         </button>
-        <button type="submit" disabled={loading} className="rounded-full bg-lime px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">
+        <button
+          type="submit"
+          onClick={() => setSubmitMode("save")}
+          disabled={loading}
+          className="rounded-full bg-lime px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+        >
           {loading ? "Opslaan..." : "Sectie opslaan"}
         </button>
         <button
-          type="button"
-          onClick={onNext}
+          type="submit"
+          onClick={() => setSubmitMode("next")}
           disabled={!canGoNext}
           className="rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold text-ink disabled:opacity-40"
         >

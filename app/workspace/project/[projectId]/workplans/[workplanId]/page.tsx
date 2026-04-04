@@ -43,7 +43,17 @@ export default async function WorkplanDetailPage({
           </p>
         </Panel>
 
-        <WorkplanDetailShell workplanId={workplanId} sections={data.sections} />
+        <WorkplanDetailShell
+          workplanId={workplanId}
+          sections={data.sections}
+          projectDefaults={{
+            titel: data.workplan.title,
+            opdrachtgever: data.project.clientName,
+            plaats: data.project.siteCity,
+            adres: data.project.siteAddress,
+            startdatum: data.project.startDate
+          }}
+        />
       </div>
     </DashboardShell>
   );

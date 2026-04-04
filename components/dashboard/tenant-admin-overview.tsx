@@ -10,7 +10,16 @@ import { StatCard } from "@/components/ui/stat-card";
 import type { TenantAdminData } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 
-export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
+function withTenant(href: string, tenantId?: string) {
+  if (!tenantId) {
+    return href;
+  }
+
+  const separator = href.includes("?") ? "&" : "?";
+  return `${href}${separator}tenantId=${tenantId}`;
+}
+
+export function TenantAdminOverview({ data, tenantId }: { data: TenantAdminData; tenantId?: string }) {
   if (!data.tenant) {
     return (
       <Panel>
@@ -20,6 +29,7 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
   }
 
   const tenant = data.tenant;
+  const topCustomers = Array.from(new Set(data.projects.map((project) => project.clientName))).slice(0, 3);
 
   const [projectQuery, setProjectQuery] = useState("");
   const filteredProjects = useMemo(() => {
@@ -38,13 +48,36 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
       <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr_0.8fr]">
         <Panel className="bg-forest text-white">
           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-white/45">Bedrijfsadmin</p>
-          <h2 className="mt-2 text-2xl font-semibold">{data.tenant.name}</h2>
+          <h2 className="mt-2 text-2xl font-semibold">{tenant.name}</h2>
           <p className="mt-2 text-sm text-white/72">
             Beheer hier medewerkers, projectdossiers, bedrijfsinstellingen en zicht op alle ingevulde formulieren voor dit steigerbouwbedrijf.
           </p>
         </Panel>
         <StatCard label="Medewerkers" value={data.employees.length} detail="Managers en werknemers" />
         <StatCard label="Inzendingen" value={data.recentSubmissions.length} detail="Recente formulieren" />
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Link href={withTenant("/admin/projects", tenantId)} className="rounded-[24px] border border-line bg-panel p-5 shadow-soft transition hover:-translate-y-0.5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Asset</p>
+          <p className="mt-3 text-lg font-semibold text-forest">Projectboard</p>
+          <p className="mt-2 text-sm text-ink/60">Open alle lopende dossiers en stuur teams sneller naar hun werkplan.</p>
+        </Link>
+        <Link href={withTenant("/workspace", tenantId)} className="rounded-[24px] border border-line bg-panel p-5 shadow-soft transition hover:-translate-y-0.5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Asset</p>
+          <p className="mt-3 text-lg font-semibold text-forest">Werkapp preview</p>
+          <p className="mt-2 text-sm text-ink/60">Bekijk precies hoe de werknemer taken, foto’s en formulieren ziet op locatie.</p>
+        </Link>
+        <Link href={withTenant("/admin/settings/rei", tenantId)} className="rounded-[24px] border border-line bg-panel p-5 shadow-soft transition hover:-translate-y-0.5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Asset</p>
+          <p className="mt-3 text-lg font-semibold text-forest">Documenthub</p>
+          <p className="mt-2 text-sm text-ink/60">RI&E, contracten en certificaten op één vaste plek voor de bedrijfsadmin.</p>
+        </Link>
+        <Link href={withTenant("/admin/employees", tenantId)} className="rounded-[24px] border border-line bg-panel p-5 shadow-soft transition hover:-translate-y-0.5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Asset</p>
+          <p className="mt-3 text-lg font-semibold text-forest">Teambeheer</p>
+          <p className="mt-2 text-sm text-ink/60">Nieuwe werknemers aanmaken, rollen bekijken en tijdelijke logins uitdelen.</p>
+        </Link>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
@@ -62,10 +95,10 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
         <Panel>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Company settings</p>
-              <h3 className="mt-2 text-2xl font-semibold text-forest">Bedrijfsprofiel en white-label</h3>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Bedrijfsinstellingen</p>
+              <h3 className="mt-2 text-2xl font-semibold text-forest">Bedrijfsprofiel en whitelabel</h3>
             </div>
-            <Link href="/admin/settings/company" className="rounded-full bg-lime px-4 py-2 text-sm font-semibold text-white">
+            <Link href={withTenant("/admin/settings/company", tenantId)} className="rounded-full bg-lime px-4 py-2 text-sm font-semibold text-white">
               Open settings
             </Link>
           </div>
@@ -140,16 +173,56 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
                   </div>
                   <p className="mt-2 text-sm text-ink/60">Start: {formatDate(project.startDate)} · Status: {project.status}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Link
-                      href={`/workspace/project/${project.id}`}
-                      className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink"
-                    >
+                    <Link href={`/admin/projects/${project.id}`} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
                       Open project
                     </Link>
                   </div>
                 </div>
               ))
             )}
+          </div>
+        </Panel>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <Panel>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Klanten</p>
+          <h3 className="mt-2 text-2xl font-semibold text-forest">Belangrijkste klantaccounts</h3>
+          <div className="mt-5 grid gap-3">
+            {topCustomers.length === 0 ? (
+              <div className="rounded-[20px] border border-line bg-mist/60 px-4 py-4 text-sm text-ink/60">
+                Er zijn nog geen klantaccounts gekoppeld aan projecten.
+              </div>
+            ) : (
+              topCustomers.map((customer) => (
+                <div key={customer} className="rounded-[20px] border border-line bg-mist/60 px-4 py-4">
+                  <p className="font-semibold text-forest">{customer}</p>
+                  <p className="mt-1 text-sm text-ink/60">
+                    {data.projects.filter((project) => project.clientName === customer).length} project(en) in deze tenant
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="mt-4">
+            <Link href={withTenant("/admin/customers", tenantId)} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
+              Open klantenoverzicht
+            </Link>
+          </div>
+        </Panel>
+
+        <Panel>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Instellingen</p>
+          <h3 className="mt-2 text-2xl font-semibold text-forest">Direct naar belangrijke beheerpunten</h3>
+          <div className="mt-5 grid gap-3">
+            <Link href={withTenant("/admin/settings/rei", tenantId)} className="rounded-[20px] border border-line bg-mist/60 px-4 py-4 transition hover:-translate-y-0.5">
+              <p className="font-semibold text-forest">RE&I en documenten</p>
+              <p className="mt-1 text-sm text-ink/60">Open de documentbibliotheek voor veiligheid, contracten en certificaten.</p>
+            </Link>
+            <Link href={withTenant("/admin/settings/billing", tenantId)} className="rounded-[20px] border border-line bg-mist/60 px-4 py-4 transition hover:-translate-y-0.5">
+              <p className="font-semibold text-forest">Abonnement</p>
+              <p className="mt-1 text-sm text-ink/60">Bekijk pakket, status en welke functies bij dit account horen.</p>
+            </Link>
           </div>
         </Panel>
       </section>
