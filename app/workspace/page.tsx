@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { PackageWorkspace } from "@/components/dashboard/package-workspace";
 import { LogoutButton } from "@/components/forms/logout-button";
 import { requireAppUser } from "@/lib/auth";
@@ -13,23 +14,32 @@ export default async function WorkspacePage({
   const user = await requireAppUser();
   const tenantId = user.role === "agency_admin" ? params.tenantId : user.tenantId ?? undefined;
   const data = await getPackageWorkspaceData(tenantId);
+  const roleLabel = user.role === "agency_admin" ? "Tenant demo" : user.role === "tenant_admin" ? "Bedrijfsadmin" : "Werkvloer";
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8 lg:px-10">
-      <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-sm uppercase tracking-[0.24em] text-ink/50">Tenant workspace</p>
-          <h1 className="mt-2 text-4xl font-semibold text-ink">Werkprocessen en formulieren</h1>
-          <p className="mt-2 text-sm text-ink/60">Ingelogd als {user.fullName}</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/" className="rounded-full border border-ink/10 px-4 py-2 text-sm text-ink">
-            Terug naar home
-          </Link>
+    <DashboardShell
+      roleLabel={roleLabel}
+      brand={data.tenant?.name ?? "SteigerHub"}
+      title="Werkprocessen en formulieren"
+      subtitle={`Ingelogd als ${user.fullName}. Dit scherm is rustig gehouden voor mobiel gebruik op de werkvloer en duidelijk genoeg voor de eigenaar op desktop.`}
+      navItems={[
+        { label: "Overzicht", href: tenantId ? `/workspace?tenantId=${tenantId}` : "/workspace", active: true, caption: "Dashboard en taken" },
+        { label: "Projecten", href: tenantId ? `/workspace?tenantId=${tenantId}#projecten` : "/workspace#projecten", caption: "Klant en adres" },
+        { label: "Formulieren", href: tenantId ? `/workspace?tenantId=${tenantId}#formulieren` : "/workspace#formulieren", caption: "Invullen en uploaden" },
+        { label: "Bedrijfsprofiel", href: tenantId ? `/workspace?tenantId=${tenantId}#profiel` : "/workspace#profiel", caption: "Logo en RE&I" }
+      ]}
+      actions={
+        <>
+          {user.role === "agency_admin" ? (
+            <Link href="/agency" className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
+              Agency
+            </Link>
+          ) : null}
           <LogoutButton />
-        </div>
-      </header>
+        </>
+      }
+    >
       <PackageWorkspace data={data} />
-    </main>
+    </DashboardShell>
   );
 }

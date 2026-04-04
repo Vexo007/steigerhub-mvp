@@ -9,14 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#13212c",
-        mist: "#eef4f3",
-        moss: "#32513f",
-        sand: "#dcc8a6",
-        rust: "#ba6b3f"
+        ink: "#102317",
+        mist: "#f4f7f4",
+        moss: "#1d4d2b",
+        sand: "#dfe9e2",
+        rust: "#49a642",
+        forest: "#0a331c",
+        lime: "#49a642",
+        canvas: "#f6faf7",
+        line: "#d8e5dc",
+        panel: "#fcfefd"
       },
       boxShadow: {
-        panel: "0 18px 60px rgba(19, 33, 44, 0.08)"
+        panel: "0 20px 60px rgba(10, 51, 28, 0.08)",
+        soft: "0 8px 30px rgba(10, 51, 28, 0.06)"
       }
     }
   },
@@ -24,4 +30,3 @@ const config: Config = {
 };
 
 export default config;
-

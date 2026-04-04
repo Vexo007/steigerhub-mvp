@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { LogoutButton } from "@/components/forms/logout-button";
 import { AgencyOverview } from "@/components/dashboard/agency-overview";
 import { requireAgencyUser } from "@/lib/auth";
@@ -9,21 +10,26 @@ export default async function AgencyPage() {
   const data = await getAgencyDashboardData();
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8 lg:px-10">
-      <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-sm uppercase tracking-[0.24em] text-ink/50">Agency dashboard</p>
-          <h1 className="mt-2 text-4xl font-semibold text-ink">Klanten, pakketten en betalingen</h1>
-          <p className="mt-2 text-sm text-ink/60">Ingelogd als {user.fullName}</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/" className="rounded-full border border-ink/10 px-4 py-2 text-sm text-ink">
-            Terug naar home
+    <DashboardShell
+      roleLabel="Agency"
+      brand="SteigerHub"
+      title="Klanten, pakketten en betalingen"
+      subtitle={`Ingelogd als ${user.fullName}. Beheer hier al je klanten en hun softwarepakket vanuit één rustige agency-omgeving.`}
+      navItems={[
+        { label: "Overzicht", href: "/agency", active: true, caption: "Klanten en omzet" },
+        { label: "Pakketten", href: "/agency/packages", caption: "Templates en modules" },
+        { label: "Workspace demo", href: "/workspace", caption: "Bekijk tenant-flow" }
+      ]}
+      actions={
+        <>
+          <Link href="/" className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
+            Website
           </Link>
           <LogoutButton />
-        </div>
-      </header>
+        </>
+      }
+    >
       <AgencyOverview {...data} />
-    </main>
+    </DashboardShell>
   );
 }

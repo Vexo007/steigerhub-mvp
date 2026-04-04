@@ -9,7 +9,7 @@ export function TenantConfigEditor({ data }: { data: TenantConfigData }) {
   if (!data.tenant) {
     return (
       <Panel>
-        <h2 className="text-xl font-semibold text-ink">Tenant niet gevonden</h2>
+        <h2 className="text-xl font-semibold text-forest">Tenant niet gevonden</h2>
       </Panel>
     );
   }
@@ -18,18 +18,17 @@ export function TenantConfigEditor({ data }: { data: TenantConfigData }) {
 
   return (
     <div className="grid gap-6">
-      <Panel>
-        <p className="text-sm uppercase tracking-[0.2em] text-ink/50">Klantconfiguratie</p>
-        <h1 className="mt-2 text-3xl font-semibold text-ink">{tenant.name}</h1>
-        <p className="mt-2 text-sm text-ink/60">
-          Pakket: {data.packageDefinition?.name ?? "Nog geen pakket"}.
-          Hier kun je modules, formulieren en velden aanpassen zonder code.
+      <Panel className="bg-forest text-white">
+        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-white/45">Klantconfiguratie</p>
+        <h1 className="mt-2 text-3xl font-semibold">{tenant.name}</h1>
+        <p className="mt-2 text-sm text-white/72">
+          Pakket: {data.packageDefinition?.name ?? "Nog geen pakket"}. Hier kun je modules, formulieren en velden aanpassen zonder code.
         </p>
       </Panel>
 
       {data.packageDefinition ? (
         <Panel>
-          <h2 className="text-xl font-semibold text-ink">Nieuwe module toevoegen</h2>
+          <h2 className="text-xl font-semibold text-forest">Nieuwe module toevoegen</h2>
           <div className="mt-4">
             <ModuleCreateForm packageId={data.packageDefinition.id} tenantId={tenant.id} />
           </div>
@@ -40,27 +39,23 @@ export function TenantConfigEditor({ data }: { data: TenantConfigData }) {
         <Panel key={bundle.module.id}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-ink/50">Module</p>
-              <h2 className="mt-2 text-2xl font-semibold text-ink">{bundle.module.name}</h2>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Module</p>
+              <h2 className="mt-2 text-2xl font-semibold text-forest">{bundle.module.name}</h2>
             </div>
-            <ModuleToggleButton
-              moduleId={bundle.module.id}
-              tenantId={tenant.id}
-              isEnabled={bundle.module.isEnabled}
-            />
+            <ModuleToggleButton moduleId={bundle.module.id} tenantId={tenant.id} isEnabled={bundle.module.isEnabled} />
           </div>
 
           <div className="mt-6 grid gap-6">
             <FormCreateForm moduleId={bundle.module.id} tenantId={tenant.id} />
 
             {bundle.forms.map(({ form, fields }) => (
-              <div key={form.id} className="rounded-[24px] bg-mist p-5">
-                <h3 className="text-xl font-semibold text-ink">{form.name}</h3>
+              <div key={form.id} className="rounded-[22px] border border-line bg-mist/70 p-5">
+                <h3 className="text-xl font-semibold text-forest">{form.name}</h3>
                 {form.description ? <p className="mt-1 text-sm text-ink/60">{form.description}</p> : null}
                 <div className="mt-4 grid gap-3">
                   {fields.map((field) => (
-                    <div key={field.id} className="rounded-2xl bg-white px-4 py-3 text-sm text-ink/75">
-                      <p className="font-semibold text-ink">{field.label}</p>
+                    <div key={field.id} className="rounded-2xl border border-line bg-panel px-4 py-3 text-sm text-ink/75">
+                      <p className="font-semibold text-forest">{field.label}</p>
                       <p>
                         {field.type}
                         {field.required ? " · verplicht" : " · optioneel"}

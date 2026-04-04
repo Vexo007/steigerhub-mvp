@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { TenantConfigEditor } from "@/components/dashboard/tenant-config-editor";
 import { LogoutButton } from "@/components/forms/logout-button";
 import { requireAgencyUser } from "@/lib/auth";
@@ -14,29 +15,34 @@ export default async function TenantConfigPage({
   const data = await getTenantConfigData(tenantId);
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8 lg:px-10">
-      <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-sm uppercase tracking-[0.24em] text-ink/50">Tenant package config</p>
-          <h1 className="mt-2 text-4xl font-semibold text-ink">Configuratie per klant</h1>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/agency" className="rounded-full border border-ink/10 px-4 py-2 text-sm text-ink">
-            Terug naar agency
+    <DashboardShell
+      roleLabel="Agency"
+      brand="SteigerHub"
+      title="Configuratie per klant"
+      subtitle="Schakel hier modules in of uit en pas formulieren en velden aan zonder code. Dit is je white-label beheerlaag."
+      navItems={[
+        { label: "Overzicht", href: "/agency", caption: "Klanten en omzet" },
+        { label: "Pakketten", href: "/agency/packages", caption: "Templates en modules" },
+        { label: "Klantconfig", href: `/agency/tenants/${tenantId}/config`, active: true, caption: "Per tenant aanpassen" }
+      ]}
+      actions={
+        <>
+          <Link href="/agency" className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
+            Agency
           </Link>
           {tenantId ? (
             <Link
               href={`/workspace?tenantId=${tenantId}`}
-              className="rounded-full border border-ink/10 px-4 py-2 text-sm text-ink"
+              className="rounded-full bg-lime px-4 py-2 text-sm font-semibold text-white"
             >
               Open workspace
             </Link>
           ) : null}
           <LogoutButton />
-        </div>
-      </header>
-
+        </>
+      }
+    >
       <TenantConfigEditor data={data} />
-    </main>
+    </DashboardShell>
   );
 }

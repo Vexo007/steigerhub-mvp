@@ -1,14 +1,18 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 export function Panel({
   children,
-  className = ""
+  className = "",
+  ...props
 }: {
   children: ReactNode;
   className?: string;
-}) {
+} & HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`rounded-[28px] border border-white/60 bg-white p-6 shadow-panel ${className}`}>
+    <div
+      className={`rounded-[24px] border border-line/80 bg-panel p-6 shadow-soft ${className}`}
+      {...props}
+    >
       {children}
     </div>
   );

@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
+import { Manrope } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope"
+});
 
 export const metadata: Metadata = {
   title: "SteigerHub MVP",
@@ -14,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="nl">
-      <body>{children}</body>
+      <body className={`${manrope.variable} font-[family-name:var(--font-manrope)] antialiased`}>{children}</body>
     </html>
   );
 }
