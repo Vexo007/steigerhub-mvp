@@ -20,6 +20,14 @@ export interface AppUser {
   tenantId: string | null;
 }
 
+export interface EmployeeSummary {
+  id: string;
+  fullName: string;
+  email: string;
+  role: Exclude<UserRole, "agency_admin">;
+  createdAt: string;
+}
+
 export interface Tenant {
   id: string;
   name: string;
@@ -148,6 +156,7 @@ export interface DynamicRecord {
   tenantId: string;
   projectId: string | null;
   formId: string;
+  createdBy: string | null;
   createdAt: string;
   status: string;
 }
@@ -172,7 +181,14 @@ export interface PackageWorkspaceData {
   packageDefinition: PackageDefinition | null;
   projects: Project[];
   moduleBundles: ModuleBundle[];
-  recordsByFormId: Record<string, Array<{ record: DynamicRecord; values: DynamicFieldValue[] }>>;
+  recordsByFormId: Record<
+    string,
+    Array<{
+      record: DynamicRecord;
+      actorName: string | null;
+      values: DynamicFieldValue[];
+    }>
+  >;
 }
 
 export interface TenantConfigData {
@@ -180,4 +196,19 @@ export interface TenantConfigData {
   packageDefinition: PackageDefinition | null;
   packages: PackageDefinition[];
   moduleBundles: ModuleBundle[];
+}
+
+export interface TenantAdminData {
+  tenant: Tenant | null;
+  packageDefinition: PackageDefinition | null;
+  employees: EmployeeSummary[];
+  projects: Project[];
+  recentSubmissions: Array<{
+    id: string;
+    formName: string;
+    projectName: string | null;
+    actorName: string | null;
+    createdAt: string;
+    status: string;
+  }>;
 }

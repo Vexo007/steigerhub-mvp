@@ -82,10 +82,16 @@ export function AgencyOverview({
                       <td className="py-5">
                         <div className="grid gap-2 md:min-w-[220px]">
                           <Link
+                            href={`/admin?tenantId=${tenant.id}`}
+                            className="rounded-full border border-line px-4 py-2 text-center text-sm font-semibold text-ink"
+                          >
+                            Open als eigenaar
+                          </Link>
+                          <Link
                             href={`/workspace?tenantId=${tenant.id}`}
                             className="rounded-full border border-line px-4 py-2 text-center text-sm font-semibold text-ink"
                           >
-                            Open workspace
+                            Open werkapp
                           </Link>
                           <Link
                             href={`/agency/tenants/${tenant.id}/config`}

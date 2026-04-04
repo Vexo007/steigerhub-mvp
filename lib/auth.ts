@@ -97,5 +97,13 @@ export function getAuthorizedTenantId(user: AppUser, requestedTenantId?: string 
 }
 
 export function getDefaultAppPath(user: AppUser) {
-  return user.role === "agency_admin" ? "/agency" : "/workspace";
+  if (user.role === "agency_admin") {
+    return "/agency";
+  }
+
+  if (user.role === "tenant_admin") {
+    return "/admin";
+  }
+
+  return "/workspace";
 }

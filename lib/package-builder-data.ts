@@ -3,11 +3,13 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getAgencyDashboardData, getTenantWorkspaceData } from "@/lib/data";
 import type {
   DynamicFieldType,
+  EmployeeSummary,
   FieldDefinition,
   FormDefinition,
   ModuleBundle,
   ModuleDefinition,
   PackageDefinition,
+  TenantAdminData,
   PackageWorkspaceData,
   Tenant,
   TenantConfigData
@@ -55,6 +57,7 @@ type RecordRow = {
   tenant_id: string;
   project_id: string | null;
   form_id: string;
+  created_by: string | null;
   created_at: string;
   status: string;
 };
@@ -238,10 +241,15 @@ export async function getPackageWorkspaceData(tenantId?: string): Promise<Packag
   const db = supabase as any;
   const { data: recordRows } = await db
     .from("records")
-    .select("id,tenant_id,project_id,form_id,created_at,status")
+    .select("id,tenant_id,project_id,form_id,created_by,created_at,status")
     .eq("tenant_id", tenant.id)
     .in("form_id", formIds)
     .order("created_at", { ascending: false });
+
+  const actorIds = ((recordRows ?? []) as RecordRow[]).map((record) => record.created_by).filter(Boolean);
+  const { data: actorRows } = actorIds.length
+    ? await db.from("profiles").select("id,full_name").in("id", actorIds)
+    : { data: [] };
 
   const recordIds = ((recordRows ?? []) as RecordRow[]).map((record) => record.id);
   const { data: valueRows } = recordIds.length
@@ -250,6 +258,7 @@ export async function getPackageWorkspaceData(tenantId?: string): Promise<Packag
 
   const records = (recordRows ?? []) as RecordRow[];
   const values = (valueRows ?? []) as FieldValueRow[];
+  const actors = new Map<string, string>(((actorRows ?? []) as Array<{ id: string; full_name: string | null }>).map((row) => [row.id, row.full_name ?? "Onbekend"]));
   const recordsByFormId = Object.fromEntries(
     formIds.map((formId) => [
       formId,
@@ -261,9 +270,11 @@ export async function getPackageWorkspaceData(tenantId?: string): Promise<Packag
             tenantId: record.tenant_id,
             projectId: record.project_id,
             formId: record.form_id,
+            createdBy: record.created_by,
             createdAt: record.created_at,
             status: record.status
           },
+          actorName: record.created_by ? (actors.get(record.created_by) ?? "Onbekend") : null,
           values: values
             .filter((value) => value.record_id === record.id)
             .map((value) => ({
@@ -282,6 +293,81 @@ export async function getPackageWorkspaceData(tenantId?: string): Promise<Packag
     projects: workspace.projects,
     moduleBundles: config.moduleBundles,
     recordsByFormId
+  };
+}
+
+export async function getTenantAdminData(tenantId?: string): Promise<TenantAdminData> {
+  const workspace = await getPackageWorkspaceData(tenantId);
+  const tenant = workspace.tenant;
+  const supabase = createSupabaseAdminClient();
+
+  if (!tenant || !supabase) {
+    return {
+      tenant,
+      packageDefinition: workspace.packageDefinition,
+      employees: [],
+      projects: workspace.projects,
+      recentSubmissions: []
+    };
+  }
+
+  const db = supabase as any;
+  const [{ data: profileRows }, { data: recordRows }] = await Promise.all([
+    db
+      .from("profiles")
+      .select("id,full_name,email,role,created_at")
+      .eq("tenant_id", tenant.id)
+      .order("created_at", { ascending: false }),
+    db
+      .from("records")
+      .select("id,project_id,form_id,created_by,created_at,status")
+      .eq("tenant_id", tenant.id)
+      .order("created_at", { ascending: false })
+      .limit(20)
+  ]);
+
+  const employees = ((profileRows ?? []) as Array<{
+    id: string;
+    full_name: string;
+    email: string;
+    role: EmployeeSummary["role"];
+    created_at: string;
+  }>).map((profile) => ({
+    id: profile.id,
+    fullName: profile.full_name,
+    email: profile.email,
+    role: profile.role,
+    createdAt: profile.created_at
+  }));
+
+  const formLookup = new Map(
+    workspace.moduleBundles.flatMap((bundle) => bundle.forms.map(({ form }) => [form.id, form.name] as const))
+  );
+  const projectLookup = new Map(workspace.projects.map((project) => [project.id, project.clientName] as const));
+  const employeeLookup = new Map(employees.map((employee) => [employee.id, employee.fullName] as const));
+
+  const recentSubmissions = ((recordRows ?? []) as Array<{
+    id: string;
+    project_id: string | null;
+    form_id: string;
+    created_by: string | null;
+    created_at: string;
+    status: string;
+  }>).map((record) => ({
+    id: record.id,
+    formName: formLookup.get(record.form_id) ?? "Onbekend formulier",
+    projectName: record.project_id ? (projectLookup.get(record.project_id) ?? "Onbekend project") : null,
+    actorName: record.created_by ? (employeeLookup.get(record.created_by) ?? "Onbekend") : null,
+    createdAt: record.created_at,
+    status: record.status
+  }));
+
+  return {
+    tenant,
+    packageDefinition: workspace.packageDefinition,
+    employees,
+    projects: workspace.projects,
+    recentSubmissions
   };
 }
 
