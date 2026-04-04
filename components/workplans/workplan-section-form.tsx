@@ -14,12 +14,20 @@ export function WorkplanSectionForm({
   workplanId,
   sectionKey,
   title,
-  initialSection
+  initialSection,
+  onPrevious,
+  onNext,
+  canGoPrevious,
+  canGoNext
 }: {
   workplanId: string;
   sectionKey: WorkplanSectionKey;
   title: string;
   initialSection?: ProjectWorkplanSection | null;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  canGoPrevious?: boolean;
+  canGoNext?: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -86,6 +94,16 @@ export function WorkplanSectionForm({
             Word document
           </button>
         </div>
+        <div className="flex flex-wrap gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onPrevious}
+            disabled={!canGoPrevious}
+            className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-ink disabled:opacity-40"
+          >
+            Vorige
+          </button>
+        </div>
       </div>
     );
   }
@@ -125,8 +143,24 @@ export function WorkplanSectionForm({
       ))}
 
       <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={!canGoPrevious}
+          className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-ink disabled:opacity-40"
+        >
+          Vorige
+        </button>
         <button type="submit" disabled={loading} className="rounded-full bg-lime px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">
           {loading ? "Opslaan..." : "Sectie opslaan"}
+        </button>
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={!canGoNext}
+          className="rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold text-ink disabled:opacity-40"
+        >
+          Opslaan en volgende
         </button>
         {message ? <p className="self-center text-sm text-emerald-700">{message}</p> : null}
         {error ? <p className="self-center text-sm text-rose-700">{error}</p> : null}

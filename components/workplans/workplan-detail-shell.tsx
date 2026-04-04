@@ -34,9 +34,27 @@ export function WorkplanDetailShell({
 
   const current = workplanSections.find((section) => section.key === activeSection) ?? workplanSections[0];
   const initialSection = sectionMap.get(current.key) ?? null;
+  const activeIndex = workplanSections.findIndex((section) => section.key === activeSection);
+  const completedCount = workplanSections.filter((section) => sectionCompletion(sectionMap.get(section.key))).length;
+  const progress = Math.round((completedCount / workplanSections.length) * 100);
 
   return (
     <div className="grid gap-6">
+      <Panel className="bg-mist/55">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Voortgang werkplan</p>
+            <h3 className="mt-2 text-2xl font-semibold text-forest">{completedCount} van {workplanSections.length} secties ingevuld</h3>
+          </div>
+          <div className="min-w-[220px] flex-1 max-w-[360px]">
+            <div className="h-3 overflow-hidden rounded-full bg-white">
+              <div className="h-full rounded-full bg-lime transition-all" style={{ width: `${progress}%` }} />
+            </div>
+            <p className="mt-2 text-sm text-ink/60">{progress}% gereed</p>
+          </div>
+        </div>
+      </Panel>
+
       <div className="overflow-x-auto rounded-[24px] border border-line bg-panel shadow-soft">
         <div className="flex min-w-max gap-0">
           {workplanSections.map((section, index) => {
@@ -87,6 +105,10 @@ export function WorkplanDetailShell({
             sectionKey={current.key}
             title={current.title}
             initialSection={initialSection}
+            onPrevious={activeIndex > 0 ? () => setActiveSection(workplanSections[activeIndex - 1].key) : undefined}
+            onNext={activeIndex < workplanSections.length - 1 ? () => setActiveSection(workplanSections[activeIndex + 1].key) : undefined}
+            canGoPrevious={activeIndex > 0}
+            canGoNext={activeIndex < workplanSections.length - 1}
           />
         </div>
       </Panel>
