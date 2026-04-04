@@ -28,6 +28,27 @@ export interface EmployeeSummary {
   createdAt: string;
 }
 
+export interface CompanyProfile {
+  tenantId: string;
+  displayName: string;
+  primaryColor: string;
+  secondaryColor: string;
+  logoPath: string | null;
+  rieNotes: string;
+  companyNotes: string;
+}
+
+export interface CompanyDocument {
+  id: string;
+  tenantId: string;
+  category: "rie" | "contract" | "certificate" | "other";
+  title: string;
+  bucketPath: string;
+  fileName: string;
+  uploadedBy: string | null;
+  createdAt: string;
+}
+
 export interface Tenant {
   id: string;
   name: string;
@@ -203,6 +224,8 @@ export interface TenantAdminData {
   packageDefinition: PackageDefinition | null;
   employees: EmployeeSummary[];
   projects: Project[];
+  companyProfile: CompanyProfile | null;
+  companyDocuments: CompanyDocument[];
   recentSubmissions: Array<{
     id: string;
     formName: string;

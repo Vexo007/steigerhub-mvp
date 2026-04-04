@@ -2,6 +2,8 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getAgencyDashboardData, getTenantWorkspaceData } from "@/lib/data";
 import type {
+  CompanyDocument,
+  CompanyProfile,
   DynamicFieldType,
   EmployeeSummary,
   FieldDefinition,
@@ -69,6 +71,27 @@ type FieldValueRow = {
   value: unknown;
 };
 
+type CompanyProfileRow = {
+  tenant_id: string;
+  display_name: string;
+  primary_color: string;
+  secondary_color: string;
+  logo_path: string | null;
+  rie_notes: string;
+  company_notes: string;
+};
+
+type CompanyDocumentRow = {
+  id: string;
+  tenant_id: string;
+  category: CompanyDocument["category"];
+  title: string;
+  bucket_path: string;
+  file_name: string;
+  uploaded_by: string | null;
+  created_at: string;
+};
+
 function mapPackage(row: PackageRow): PackageDefinition {
   return {
     id: row.id,
@@ -111,6 +134,31 @@ function mapField(row: FieldRow): FieldDefinition {
     options: Array.isArray(row.options) ? (row.options as string[]) : [],
     helpText: row.help_text,
     sortOrder: row.sort_order
+  };
+}
+
+function mapCompanyProfile(row: CompanyProfileRow): CompanyProfile {
+  return {
+    tenantId: row.tenant_id,
+    displayName: row.display_name,
+    primaryColor: row.primary_color,
+    secondaryColor: row.secondary_color,
+    logoPath: row.logo_path,
+    rieNotes: row.rie_notes,
+    companyNotes: row.company_notes
+  };
+}
+
+function mapCompanyDocument(row: CompanyDocumentRow): CompanyDocument {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    category: row.category,
+    title: row.title,
+    bucketPath: row.bucket_path,
+    fileName: row.file_name,
+    uploadedBy: row.uploaded_by,
+    createdAt: row.created_at
   };
 }
 
@@ -307,12 +355,14 @@ export async function getTenantAdminData(tenantId?: string): Promise<TenantAdmin
       packageDefinition: workspace.packageDefinition,
       employees: [],
       projects: workspace.projects,
+      companyProfile: null,
+      companyDocuments: [],
       recentSubmissions: []
     };
   }
 
   const db = supabase as any;
-  const [{ data: profileRows }, { data: recordRows }] = await Promise.all([
+  const [{ data: profileRows }, { data: recordRows }, { data: companyProfileRow }, { data: companyDocumentRows }] = await Promise.all([
     db
       .from("profiles")
       .select("id,full_name,email,role,created_at")
@@ -323,7 +373,17 @@ export async function getTenantAdminData(tenantId?: string): Promise<TenantAdmin
       .select("id,project_id,form_id,created_by,created_at,status")
       .eq("tenant_id", tenant.id)
       .order("created_at", { ascending: false })
-      .limit(20)
+      .limit(20),
+    db
+      .from("company_profiles")
+      .select("tenant_id,display_name,primary_color,secondary_color,logo_path,rie_notes,company_notes")
+      .eq("tenant_id", tenant.id)
+      .maybeSingle(),
+    db
+      .from("company_documents")
+      .select("id,tenant_id,category,title,bucket_path,file_name,uploaded_by,created_at")
+      .eq("tenant_id", tenant.id)
+      .order("created_at", { ascending: false })
   ]);
 
   const employees = ((profileRows ?? []) as Array<{
@@ -367,6 +427,8 @@ export async function getTenantAdminData(tenantId?: string): Promise<TenantAdmin
     packageDefinition: workspace.packageDefinition,
     employees,
     projects: workspace.projects,
+    companyProfile: companyProfileRow ? mapCompanyProfile(companyProfileRow as CompanyProfileRow) : null,
+    companyDocuments: ((companyDocumentRows ?? []) as CompanyDocumentRow[]).map(mapCompanyDocument),
     recentSubmissions
   };
 }
