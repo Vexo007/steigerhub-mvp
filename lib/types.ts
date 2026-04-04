@@ -212,6 +212,35 @@ export interface PackageWorkspaceData {
   >;
 }
 
+export interface ProjectTaskCard {
+  key: string;
+  label: string;
+  description: string;
+  href: string;
+  variant: "generator" | "form";
+}
+
+export interface ProjectWorkplan {
+  id: string;
+  tenantId: string;
+  projectId: string;
+  title: string;
+  planType: string;
+  status: string;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectWorkplanSection {
+  id: string;
+  workplanId: string;
+  sectionKey: string;
+  title: string;
+  payload: Record<string, unknown>;
+  updatedAt: string;
+}
+
 export interface TenantConfigData {
   tenant: Tenant | null;
   packageDefinition: PackageDefinition | null;

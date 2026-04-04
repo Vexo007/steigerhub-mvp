@@ -141,7 +141,7 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
                   <p className="mt-2 text-sm text-ink/60">Start: {formatDate(project.startDate)} · Status: {project.status}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Link
-                      href={`/workspace?tenantId=${tenant.id}&projectId=${project.id}`}
+                      href={`/workspace/project/${project.id}`}
                       className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink"
                     >
                       Open project

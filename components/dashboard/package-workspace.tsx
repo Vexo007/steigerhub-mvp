@@ -88,7 +88,7 @@ export function PackageWorkspace({
                   {!selectedProject ? (
                     <div className="mt-4">
                       <Link
-                        href={tenant.id ? `/workspace?tenantId=${tenant.id}&projectId=${project.id}` : `/workspace?projectId=${project.id}`}
+                        href={`/workspace/project/${project.id}`}
                         className="inline-flex rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink"
                       >
                         Open project
@@ -133,7 +133,7 @@ export function PackageWorkspace({
           <div className="mt-6 grid gap-6">
             {data.moduleBundles.map((bundle) => (
               <section key={bundle.module.id} className="rounded-[24px] border border-line bg-mist/55 p-5">
-                <div>
+                <div id={`module-${bundle.module.slug}`}>
                   <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Module</p>
                   <h3 className="mt-2 text-2xl font-semibold text-forest">{bundle.module.name}</h3>
                 </div>
