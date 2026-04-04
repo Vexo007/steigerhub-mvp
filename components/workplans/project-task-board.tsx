@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import type { Project, ProjectTaskCard } from "@/lib/types";
 
 export function ProjectTaskBoard({
@@ -32,7 +33,7 @@ export function ProjectTaskBoard({
             <h2 className="mt-2 text-xl font-semibold text-forest">{task.label}</h2>
             <p className="mt-3 text-sm text-ink/65">{task.description}</p>
             <div className="mt-5">
-              <Link href={task.href} className="inline-flex rounded-full bg-lime px-4 py-2 text-sm font-semibold text-white">
+              <Link href={task.href as Route} className="inline-flex rounded-full bg-lime px-4 py-2 text-sm font-semibold text-white">
                 Open taak
               </Link>
             </div>
