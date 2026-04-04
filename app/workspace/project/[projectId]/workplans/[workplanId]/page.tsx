@@ -2,10 +2,9 @@ import Link from "next/link";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { LogoutButton } from "@/components/forms/logout-button";
 import { Panel } from "@/components/ui/panel";
-import { WorkplanSectionForm } from "@/components/workplans/workplan-section-form";
+import { WorkplanDetailShell } from "@/components/workplans/workplan-detail-shell";
 import { requireAppUser } from "@/lib/auth";
 import { getWorkplanDetail } from "@/lib/workplan-data";
-import { workplanSections } from "@/lib/workplans";
 
 export default async function WorkplanDetailPage({
   params
@@ -22,11 +21,10 @@ export default async function WorkplanDetailPage({
       brand={data.tenant?.name ?? "SteigerHub"}
       title={data.workplan.title}
       subtitle="Werk het plan stap voor stap uit in secties, zoals je nu ook in het KAM-systeem ziet, maar dan rustiger en moderner."
-      navItems={workplanSections.map((section) => ({
-        label: section.title,
-        href: `#${section.key}`,
-        caption: "Werkplan sectie"
-      }))}
+      navItems={[
+        { label: "Werkplan", href: `/workspace/project/${projectId}/workplans/${workplanId}`, active: true, caption: "Secties en voortgang" },
+        { label: "Lijst", href: `/workspace/project/${projectId}/workplans`, caption: "Alle werkplannen" }
+      ]}
       actions={
         <>
           <Link href={`/workspace/project/${projectId}/workplans`} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
@@ -45,26 +43,7 @@ export default async function WorkplanDetailPage({
           </p>
         </Panel>
 
-        <div className="grid gap-4">
-          {workplanSections.map((section) => {
-            const initialSection = data.sections.find((item) => item.sectionKey === section.key) ?? null;
-            return (
-              <section key={section.key} id={section.key} className="rounded-[28px] border border-line bg-panel p-6 shadow-soft">
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">{section.title}</p>
-                <h3 className="mt-2 text-2xl font-semibold text-forest">{section.title}</h3>
-                <p className="mt-2 text-sm text-ink/60">{section.description}</p>
-                <div className="mt-5">
-                  <WorkplanSectionForm
-                    workplanId={workplanId}
-                    sectionKey={section.key}
-                    title={section.title}
-                    initialSection={initialSection}
-                  />
-                </div>
-              </section>
-            );
-          })}
-        </div>
+        <WorkplanDetailShell workplanId={workplanId} sections={data.sections} />
       </div>
     </DashboardShell>
   );
