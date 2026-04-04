@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
+import { getCurrentAppUser } from "@/lib/auth";
 import { checkoutSchema } from "@/lib/validation";
 import { getPriceIdForTier, getStripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
+  const actor = await getCurrentAppUser();
+  if (!actor) {
+    return NextResponse.json({ error: "Je moet ingelogd zijn." }, { status: 401 });
+  }
+  if (actor.role !== "agency_admin") {
+    return NextResponse.json({ error: "Alleen agency admins mogen Stripe checkout openen." }, { status: 403 });
+  }
+
   const json = await request.json();
   const parsed = checkoutSchema.safeParse(json);
 
@@ -42,4 +51,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

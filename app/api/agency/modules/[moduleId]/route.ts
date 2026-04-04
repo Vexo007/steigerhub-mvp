@@ -1,11 +1,20 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { getCurrentAppUser } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ moduleId: string }> }
 ) {
+  const actor = await getCurrentAppUser();
+  if (!actor) {
+    return NextResponse.json({ error: "Je moet ingelogd zijn." }, { status: 401 });
+  }
+  if (actor.role !== "agency_admin") {
+    return NextResponse.json({ error: "Alleen agency admins mogen modules beheren." }, { status: 403 });
+  }
+
   const supabase = createSupabaseAdminClient();
   if (!supabase) {
     return NextResponse.json({ error: "Missing Supabase admin client." }, { status: 500 });
@@ -40,4 +49,3 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true });
 }
-

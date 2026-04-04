@@ -1,25 +1,41 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
+import { LoginForm } from "@/components/forms/login-form";
 import { Panel } from "@/components/ui/panel";
+import { getAgencyBootstrapState, getCurrentAppUser } from "@/lib/auth";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const [user, bootstrapState] = await Promise.all([getCurrentAppUser(), getAgencyBootstrapState()]);
+
+  if (user) {
+    redirect("/app");
+  }
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-md items-center px-6 py-10">
-      <Panel className="w-full">
-        <p className="text-sm uppercase tracking-[0.2em] text-ink/50">Demo login</p>
-        <h1 className="mt-3 text-3xl font-semibold text-ink">Kies hoe je de app wilt bekijken</h1>
-        <p className="mt-3 text-sm text-ink/70">
-          In productie koppel je dit aan Supabase Auth, magic links of e-mail uitnodigingen.
-        </p>
-        <div className="mt-6 grid gap-3">
-          <Link href="/agency" className="rounded-2xl bg-ink px-4 py-3 text-center text-white">
-            Agency admin
-          </Link>
-          <Link href="/workspace" className="rounded-2xl bg-mist px-4 py-3 text-center text-ink">
-            Tenant gebruiker
-          </Link>
-        </div>
-      </Panel>
+    <main className="mx-auto min-h-screen max-w-5xl px-6 py-8 lg:px-10">
+      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <Panel className="bg-ink text-white">
+          <p className="text-sm uppercase tracking-[0.3em] text-sand">SteigerHub login</p>
+          <h1 className="mt-4 text-4xl font-semibold leading-tight">Log in als agency of klantomgeving.</h1>
+          <p className="mt-4 max-w-lg text-white/75">
+            Agency beheert klanten en pakketten. Klanten zien alleen hun eigen tenant en werkprocessen.
+          </p>
+        </Panel>
+
+        <Panel>
+          <h2 className="text-2xl font-semibold text-ink">Inloggen</h2>
+          <p className="mt-2 text-sm text-ink/60">
+            Gebruik je agency-login of de tijdelijke tenant-login die bij onboarding is aangemaakt.
+          </p>
+          <div className="mt-6">
+            <LoginForm />
+          </div>
+          {!bootstrapState.hasAgencyAdmin ? (
+            <p className="mt-4 text-sm text-ink/60">
+              Nog geen agency admin? Ga naar <a className="font-semibold text-ink underline" href="/setup">/setup</a>.
+            </p>
+          ) : null}
+        </Panel>
+      </section>
     </main>
   );
 }
-

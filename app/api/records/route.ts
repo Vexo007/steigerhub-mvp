@@ -1,8 +1,14 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { getAuthorizedTenantId, getCurrentAppUser } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
+  const actor = await getCurrentAppUser();
+  if (!actor) {
+    return NextResponse.json({ error: "Je moet ingelogd zijn." }, { status: 401 });
+  }
+
   const supabase = createSupabaseAdminClient();
   if (!supabase) {
     return NextResponse.json({ error: "Missing Supabase admin client." }, { status: 500 });
@@ -17,7 +23,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Tenant en formulier zijn verplicht." }, { status: 400 });
   }
 
+  let authorizedTenantId: string;
+  try {
+    authorizedTenantId = getAuthorizedTenantId(actor, tenantId) ?? tenantId;
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Geen toegang tot deze tenant." },
+      { status: 403 }
+    );
+  }
+
   const db = supabase as any;
+  if (projectIdValue) {
+    const { data: project } = await db
+      .from("projects")
+      .select("id,tenant_id")
+      .eq("id", projectIdValue)
+      .single();
+
+    if (!project || project.tenant_id !== authorizedTenantId) {
+      return NextResponse.json({ error: "Project hoort niet bij deze tenant." }, { status: 403 });
+    }
+  }
+
   const { data: fields, error: fieldError } = await db
     .from("form_fields")
     .select("id,field_key,type")
@@ -30,9 +58,10 @@ export async function POST(request: Request) {
   const { data: record, error: recordError } = await db
     .from("records")
     .insert({
-      tenant_id: tenantId,
+      tenant_id: authorizedTenantId,
       project_id: projectIdValue || null,
       form_id: formId,
+      created_by: actor.id,
       status: "submitted"
     })
     .select("id")
@@ -51,7 +80,7 @@ export async function POST(request: Request) {
     if (field.type === "photo") {
       if (raw instanceof File && raw.size > 0) {
         const extension = raw.name.includes(".") ? raw.name.split(".").pop() : "bin";
-        const path = `${tenantId}/${record.id}/${field.id}-${Date.now()}.${extension}`;
+        const path = `${authorizedTenantId}/${record.id}/${field.id}-${Date.now()}.${extension}`;
         const arrayBuffer = await raw.arrayBuffer();
         const { error: uploadError } = await supabase.storage
           .from("tenant-files")
@@ -101,7 +130,7 @@ export async function POST(request: Request) {
     }
   }
 
-  revalidatePath(`/workspace?tenantId=${tenantId}`);
+  revalidatePath(`/workspace?tenantId=${authorizedTenantId}`);
   revalidatePath("/workspace");
 
   return NextResponse.json({ ok: true, recordId: record.id });

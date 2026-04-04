@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Panel } from "@/components/ui/panel";
+import { getCurrentAppUser } from "@/lib/auth";
 
 const features = [
   "Agency dashboard voor klanten, pakketten en support",
@@ -8,7 +9,9 @@ const features = [
   "AVG-basis met tenant-scheiding, private opslag en audit-log structuur"
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const user = await getCurrentAppUser();
+
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-6 py-8 lg:px-10">
       <section className="overflow-hidden rounded-[40px] bg-ink px-7 py-8 text-white lg:px-10 lg:py-12">
@@ -23,15 +26,20 @@ export default function HomePage() {
               directe Stripe-koppeling voor abonnementen.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/agency" className="rounded-full bg-rust px-5 py-3 text-sm font-semibold text-white">
-                Open agency dashboard
-              </Link>
               <Link
-                href="/workspace"
-                className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white"
+                href={user ? (user.role === "agency_admin" ? "/agency" : "/workspace") : "/login"}
+                className="rounded-full bg-rust px-5 py-3 text-sm font-semibold text-white"
               >
-                Open tenant workspace
+                {user ? "Open dashboard" : "Inloggen"}
               </Link>
+              {!user ? (
+                <Link
+                  href="/setup"
+                  className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white"
+                >
+                  Eerste setup
+                </Link>
+              ) : null}
             </div>
           </div>
           <Panel className="bg-white/95">
@@ -73,4 +81,3 @@ export default function HomePage() {
     </main>
   );
 }
-

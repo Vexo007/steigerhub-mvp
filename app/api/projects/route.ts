@@ -1,9 +1,15 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { getAuthorizedTenantId, getCurrentAppUser } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createProjectSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
+  const actor = await getCurrentAppUser();
+  if (!actor) {
+    return NextResponse.json({ error: "Je moet ingelogd zijn." }, { status: 401 });
+  }
+
   const json = await request.json();
   const parsed = createProjectSchema.safeParse(json);
 
@@ -23,12 +29,22 @@ export async function POST(request: Request) {
     );
   }
 
+  let tenantId: string;
+  try {
+    tenantId = getAuthorizedTenantId(actor, parsed.data.tenantId) ?? parsed.data.tenantId;
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Geen toegang tot deze tenant." },
+      { status: 403 }
+    );
+  }
+
   const db = supabase as any;
 
   const { data: project, error: projectError } = await db
     .from("projects")
     .insert({
-      tenant_id: parsed.data.tenantId,
+      tenant_id: tenantId,
       client_name: parsed.data.clientName,
       site_address: parsed.data.siteAddress,
       site_city: parsed.data.siteCity,
@@ -48,7 +64,8 @@ export async function POST(request: Request) {
   }
 
   const { error: auditError } = await db.from("audit_logs").insert({
-    tenant_id: parsed.data.tenantId,
+    tenant_id: tenantId,
+    actor_profile_id: actor.id,
     action: "project_created",
     target_table: "projects",
     target_id: project.id,
@@ -65,7 +82,7 @@ export async function POST(request: Request) {
     );
   }
 
-  revalidatePath(`/workspace?tenantId=${parsed.data.tenantId}`);
+  revalidatePath(`/workspace?tenantId=${tenantId}`);
   revalidatePath("/workspace");
   revalidatePath("/agency");
 

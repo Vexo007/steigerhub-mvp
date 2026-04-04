@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { getCurrentAppUser } from "@/lib/auth";
 import { clonePackageForTenant, getPackageDefinitions } from "@/lib/package-builder-data";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createTenantSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
+  const actor = await getCurrentAppUser();
+  if (!actor) {
+    return NextResponse.json({ error: "Je moet ingelogd zijn." }, { status: 401 });
+  }
+
+  if (actor.role !== "agency_admin") {
+    return NextResponse.json({ error: "Alleen agency admins mogen tenants aanmaken." }, { status: 403 });
+  }
+
   const json = await request.json();
   const parsed = createTenantSchema.safeParse(json);
 
@@ -25,6 +35,22 @@ export async function POST(request: Request) {
   }
 
   const db = supabase as any;
+  const temporaryPassword = `Steiger!${crypto.randomUUID().slice(0, 8)}`;
+  const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+    email: parsed.data.contactEmail,
+    password: temporaryPassword,
+    email_confirm: true,
+    user_metadata: {
+      full_name: parsed.data.contactName
+    }
+  });
+
+  if (authError || !authUser.user) {
+    return NextResponse.json(
+      { error: authError?.message ?? "Tenant login kon niet worden aangemaakt." },
+      { status: 500 }
+    );
+  }
 
   const { data: tenant, error: tenantError } = await db
     .from("tenants")
@@ -40,6 +66,7 @@ export async function POST(request: Request) {
     .single();
 
   if (tenantError || !tenant) {
+    await supabase.auth.admin.deleteUser(authUser.user.id);
     return NextResponse.json(
       { error: tenantError?.message ?? "Tenant kon niet worden aangemaakt." },
       { status: 500 }
@@ -94,6 +121,22 @@ export async function POST(request: Request) {
     );
   }
 
+  const { error: profileError } = await db.from("profiles").insert({
+    id: authUser.user.id,
+    tenant_id: tenant.id,
+    role: "tenant_admin",
+    full_name: parsed.data.contactName,
+    email: parsed.data.contactEmail
+  });
+
+  if (profileError) {
+    await supabase.auth.admin.deleteUser(authUser.user.id);
+    return NextResponse.json(
+      { error: profileError.message },
+      { status: 500 }
+    );
+  }
+
   const templates = await getPackageDefinitions();
   const preferredTemplateName =
     parsed.data.packageTier === "starter"
@@ -134,7 +177,9 @@ export async function POST(request: Request) {
       id: tenant.id,
       name: tenant.name,
       packageTier: tenant.package_tier,
-      status: tenant.status
+      status: tenant.status,
+      loginEmail: parsed.data.contactEmail,
+      temporaryPassword
     }
   });
 }

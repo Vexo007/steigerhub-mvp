@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { TenantConfigEditor } from "@/components/dashboard/tenant-config-editor";
+import { LogoutButton } from "@/components/forms/logout-button";
+import { requireAgencyUser } from "@/lib/auth";
 import { getTenantConfigData } from "@/lib/package-builder-data";
 
 export default async function TenantConfigPage({
@@ -7,6 +9,7 @@ export default async function TenantConfigPage({
 }: {
   params: Promise<{ tenantId: string }>;
 }) {
+  await requireAgencyUser();
   const { tenantId } = await params;
   const data = await getTenantConfigData(tenantId);
 
@@ -29,6 +32,7 @@ export default async function TenantConfigPage({
               Open workspace
             </Link>
           ) : null}
+          <LogoutButton />
         </div>
       </header>
 

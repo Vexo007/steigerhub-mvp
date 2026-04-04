@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
+import { getCurrentAppUser } from "@/lib/auth";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   try {
+    const actor = await getCurrentAppUser();
+    if (!actor) {
+      return NextResponse.json({ error: "Je moet ingelogd zijn." }, { status: 401 });
+    }
+    if (actor.role !== "agency_admin") {
+      return NextResponse.json({ error: "Alleen agency admins mogen de Stripe portal openen." }, { status: 403 });
+    }
+
     const { stripeCustomerId } = (await request.json()) as { stripeCustomerId?: string };
 
     if (!stripeCustomerId) {
@@ -22,4 +31,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

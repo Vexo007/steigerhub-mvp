@@ -15,12 +15,14 @@ export function TenantCreateForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setCredentials(null);
 
     const formData = new FormData(event.currentTarget);
     const payload = {
@@ -43,7 +45,7 @@ export function TenantCreateForm() {
       const result = (await response.json()) as {
         error?: string;
         message?: string;
-        data?: { id?: string };
+        data?: { id?: string; loginEmail?: string; temporaryPassword?: string };
       };
 
       if (!response.ok) {
@@ -51,6 +53,12 @@ export function TenantCreateForm() {
       }
 
       setSuccess(result.message ?? "Tenant aangemaakt.");
+      if (result.data?.loginEmail && result.data?.temporaryPassword) {
+        setCredentials({
+          email: result.data.loginEmail,
+          password: result.data.temporaryPassword
+        });
+      }
       event.currentTarget.reset();
       setTier("pro");
       router.refresh();
@@ -113,6 +121,14 @@ export function TenantCreateForm() {
         {loading ? "Bezig..." : "Tenant aanmaken"}
       </button>
       {success ? <p className="text-sm text-emerald-700 md:col-span-2">{success}</p> : null}
+      {credentials ? (
+        <div className="rounded-3xl bg-emerald-50 px-5 py-4 text-sm text-emerald-900 md:col-span-2">
+          <p className="font-semibold">Tijdelijke tenant-login</p>
+          <p className="mt-1">E-mail: {credentials.email}</p>
+          <p>Wachtwoord: {credentials.password}</p>
+          <p className="mt-2 text-emerald-900/75">De klant kan hiermee direct inloggen via `/login`.</p>
+        </div>
+      ) : null}
       {error ? <p className="text-sm text-rose-700 md:col-span-2">{error}</p> : null}
     </form>
   );

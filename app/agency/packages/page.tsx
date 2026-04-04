@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { PackageCreateForm } from "@/components/forms/package-create-form";
+import { LogoutButton } from "@/components/forms/logout-button";
 import { Panel } from "@/components/ui/panel";
+import { requireAgencyUser } from "@/lib/auth";
 import { getPackageDefinitions } from "@/lib/package-builder-data";
 
 export default async function AgencyPackagesPage() {
+  await requireAgencyUser();
   const packages = await getPackageDefinitions();
 
   return (
@@ -13,9 +16,12 @@ export default async function AgencyPackagesPage() {
           <p className="text-sm uppercase tracking-[0.24em] text-ink/50">Agency packages</p>
           <h1 className="mt-2 text-4xl font-semibold text-ink">Pakketten en templates</h1>
         </div>
-        <Link href="/agency" className="rounded-full border border-ink/10 px-4 py-2 text-sm text-ink">
-          Terug naar agency
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/agency" className="rounded-full border border-ink/10 px-4 py-2 text-sm text-ink">
+            Terug naar agency
+          </Link>
+          <LogoutButton />
+        </div>
       </header>
 
       <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -44,4 +50,3 @@ export default async function AgencyPackagesPage() {
     </main>
   );
 }
-
