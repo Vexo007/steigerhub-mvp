@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { TenantConfigEditor } from "@/components/dashboard/tenant-config-editor";
 import { LogoutButton } from "@/components/forms/logout-button";
@@ -32,7 +33,7 @@ export default async function TenantConfigPage({
           </Link>
           {tenantId ? (
             <Link
-              href={`/workspace?tenantId=${tenantId}`}
+              href={`/workspace?tenantId=${tenantId}` as Route}
               className="rounded-full bg-lime px-4 py-2 text-sm font-semibold text-white"
             >
               Open workspace

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 type NavItem = {
   label: string;
-  href: Route;
+  href: string;
   active?: boolean;
   caption?: string;
 };
@@ -51,7 +51,7 @@ export function DashboardShell({
             {navItems.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.href as Route}
                 className={`rounded-[18px] px-4 py-3 transition ${
                   item.active ? "bg-white text-forest shadow-soft" : "text-white/72 hover:bg-white/8 hover:text-white"
                 }`}

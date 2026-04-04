@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { PackageWorkspace } from "@/components/dashboard/package-workspace";
 import { LogoutButton } from "@/components/forms/logout-button";
@@ -31,7 +32,7 @@ export default async function WorkspacePage({
       actions={
         <>
           {user.role === "agency_admin" ? (
-            <Link href="/agency" className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
+            <Link href={"/agency" as Route} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
               Agency
             </Link>
           ) : null}
