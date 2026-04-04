@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EmployeeCreateForm } from "@/components/forms/employee-create-form";
+import { ProjectCreateForm } from "@/components/forms/project-create-form";
 import { Badge } from "@/components/ui/badge";
 import { Panel } from "@/components/ui/panel";
 import { StatCard } from "@/components/ui/stat-card";
@@ -22,7 +23,7 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-white/45">Bedrijfsadmin</p>
           <h2 className="mt-2 text-2xl font-semibold">{data.tenant.name}</h2>
           <p className="mt-2 text-sm text-white/72">
-            Beheer hier medewerkers, bedrijfsinstellingen en zicht op alle ingevulde formulieren voor dit steigerbouwbedrijf.
+            Beheer hier medewerkers, projectdossiers, bedrijfsinstellingen en zicht op alle ingevulde formulieren voor dit steigerbouwbedrijf.
           </p>
         </Panel>
         <StatCard label="Medewerkers" value={data.employees.length} detail="Managers en werknemers" />
@@ -30,6 +31,17 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+        <Panel>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Projectbeheer</p>
+          <h3 className="mt-2 text-2xl font-semibold text-forest">Project aanmaken</h3>
+          <p className="mt-2 text-sm text-ink/60">
+            De bedrijfsadmin maakt projecten aan. Daarna vullen werknemers en managers de formulieren binnen dat project in.
+          </p>
+          <div className="mt-5">
+            <ProjectCreateForm tenantId={data.tenant.id} />
+          </div>
+        </Panel>
+
         <Panel>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -55,7 +67,9 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
             </div>
           </div>
         </Panel>
+      </section>
 
+      <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <Panel>
           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Gebruikers</p>
           <h3 className="mt-2 text-2xl font-semibold text-forest">Werknemers beheren</h3>
@@ -79,6 +93,35 @@ export function TenantAdminOverview({ data }: { data: TenantAdminData }) {
                 </div>
               </div>
             ))}
+          </div>
+        </Panel>
+
+        <Panel>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Projecten</p>
+          <h3 className="mt-2 text-2xl font-semibold text-forest">Alle klantprojecten</h3>
+          <div className="mt-5 grid gap-3">
+            {data.projects.length === 0 ? (
+              <div className="rounded-[20px] border border-line bg-mist/60 px-4 py-4 text-sm text-ink/60">
+                Nog geen projecten aangemaakt.
+              </div>
+            ) : (
+              data.projects.map((project) => (
+                <div key={project.id} className="rounded-[20px] border border-line bg-mist/60 px-4 py-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-forest">{project.clientName}</p>
+                      <p className="mt-1 text-sm text-ink/60">
+                        {project.siteAddress}, {project.siteCity}
+                      </p>
+                    </div>
+                    <Badge tone={project.safetyStatus}>{project.safetyStatus}</Badge>
+                  </div>
+                  <p className="mt-2 text-sm text-ink/60">
+                    Start: {formatDate(project.startDate)} · Status: {project.status}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </Panel>
       </section>

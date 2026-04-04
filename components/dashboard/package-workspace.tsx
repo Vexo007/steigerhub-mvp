@@ -45,7 +45,7 @@ export function PackageWorkspace({ data }: { data: PackageWorkspaceData }) {
             Maak eerst een project aan en koppel daarna formulieren aan dat dossier.
           </p>
           <div className="mt-5">
-            <ProjectCreateForm tenantId={data.tenant.id} />
+            <ProjectCreateForm tenantId={tenant.id} />
           </div>
         </Panel>
 
@@ -123,9 +123,15 @@ export function PackageWorkspace({ data }: { data: PackageWorkspaceData }) {
                               Nog geen records voor dit formulier.
                             </div>
                           ) : (
-                            records.map(({ record, values }) => (
+                            records.map(({ record, actorName, values }) => (
                               <div key={record.id} className="rounded-2xl border border-line bg-mist px-4 py-3 text-sm text-ink/75">
                                 <p className="font-semibold text-forest">{formatDate(record.createdAt)}</p>
+                                <p className="mt-1 text-sm text-ink/60">
+                                  Uitgevoerd door: {actorName ?? "Onbekend"}
+                                  {record.projectId
+                                    ? ` · Project: ${data.projects.find((project) => project.id === record.projectId)?.clientName ?? "Onbekend"}`
+                                    : ""}
+                                </p>
                                 <ul className="mt-2 grid gap-1">
                                   {values.map((value) => (
                                     <li key={value.id}>
