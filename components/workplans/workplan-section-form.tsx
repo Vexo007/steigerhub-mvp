@@ -88,16 +88,18 @@ export function WorkplanSectionForm({
 
   if (sectionKey === "genereren") {
     return (
-      <div className="grid gap-4 rounded-[22px] border border-line bg-mist/55 p-5">
-        <p className="text-sm text-ink/65">Wanneer alle secties zijn ingevuld, kun je hieronder een documentvoorbeeld openen.</p>
+      <div className="grid gap-5 rounded-[22px] border border-line bg-mist/55 p-5">
+        <div className="rounded-[20px] border border-line bg-white px-4 py-4 text-sm text-ink/65">
+          Wanneer alle secties zijn ingevuld, kun je hieronder een documentvoorbeeld openen of later exporteren.
+        </div>
         <div className="grid gap-3 md:grid-cols-3">
-          <button type="button" className="rounded-2xl bg-forest px-5 py-4 text-sm font-semibold text-white">
+          <button type="button" className="rounded-2xl bg-forest px-5 py-4 text-sm font-semibold text-white shadow-soft">
             HTML preview
           </button>
-          <button type="button" className="rounded-2xl border border-line bg-white px-5 py-4 text-sm font-semibold text-ink">
+          <button type="button" className="rounded-2xl border border-line bg-white px-5 py-4 text-sm font-semibold text-ink shadow-soft">
             PDF document
           </button>
-          <button type="button" className="rounded-2xl border border-line bg-white px-5 py-4 text-sm font-semibold text-ink">
+          <button type="button" className="rounded-2xl border border-line bg-white px-5 py-4 text-sm font-semibold text-ink shadow-soft">
             Word document
           </button>
         </div>
@@ -118,23 +120,36 @@ export function WorkplanSectionForm({
   return (
     <form onSubmit={handleSubmit} className="grid gap-5">
       {Object.entries(groupedFields).map(([group, groupFields]) => (
-        <div key={group} className="rounded-[22px] border border-line bg-mist/55 p-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-ink/45">{group}</p>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <section key={group} className="overflow-hidden rounded-[22px] border border-line bg-white shadow-soft">
+          <div className="border-b border-line bg-forest px-5 py-4 text-white">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/50">Onderdeel</p>
+                <p className="mt-1 text-base font-semibold">{group}</p>
+              </div>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/85">
+                {groupFields.length} veld{groupFields.length === 1 ? "" : "en"}
+              </span>
+            </div>
+          </div>
+          <div className="grid gap-4 bg-mist/40 p-5 md:grid-cols-2">
             {groupFields.map((field) =>
               field.textarea ? (
                 <label key={field.key} className="grid gap-2 text-sm text-ink/80 md:col-span-2">
                   {field.label}
+                  {field.description ? <span className="text-xs text-ink/55">{field.description}</span> : null}
                   <textarea
                     name={field.key}
                     defaultValue={getInitialValue(payload, field.key) || projectDefaults?.[field.key] || ""}
                     placeholder={field.placeholder}
+                    rows={field.rows ?? 4}
                     className="min-h-28 rounded-2xl border border-line bg-white px-4 py-3 outline-none"
                   />
                 </label>
               ) : (
                 <label key={field.key} className="grid gap-2 text-sm text-ink/80">
                   {field.label}
+                  {field.description ? <span className="text-xs text-ink/55">{field.description}</span> : null}
                   <input
                     type={field.type === "date" ? "date" : "text"}
                     name={field.key}
@@ -146,10 +161,10 @@ export function WorkplanSectionForm({
               )
             )}
           </div>
-        </div>
+        </section>
       ))}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3 rounded-[22px] border border-line bg-panel px-5 py-4">
         <button
           type="button"
           onClick={onPrevious}
