@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorkerProjectDashboard } from "@/components/dashboard/worker-project-dashboard";
 import { ProjectCreateForm } from "@/components/forms/project-create-form";
 import { DynamicRecordForm } from "@/components/forms/dynamic-record-form";
 import { Badge } from "@/components/ui/badge";
@@ -35,11 +36,11 @@ export function PackageWorkspace({
         <Panel className="bg-forest text-white">
           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-white/45">{isWorker ? "Mijn werkdag" : "Actief pakket"}</p>
           <h2 className="mt-2 text-2xl font-semibold">
-            {isWorker ? "Kies een project en werk je taken af" : data.packageDefinition?.name ?? "Nog geen pakket gekoppeld"}
+            {isWorker ? "Kies een project en open daarna direct je taak" : data.packageDefinition?.name ?? "Nog geen pakket gekoppeld"}
           </h2>
           <p className="mt-2 max-w-2xl text-sm text-white/72">
             {isWorker
-              ? "Open een project, vul formulieren in en upload foto’s of bijlagen direct vanaf locatie."
+              ? "De werkapp is nu eerst een projecten dashboard. Daarna kies je per project taken zoals keuring, tekening, oplevering of werkplan."
               : data.packageDefinition?.description ?? "Koppel eerst een pakket of template aan deze tenant."}
           </p>
         </Panel>
@@ -53,83 +54,66 @@ export function PackageWorkspace({
         ) : null}
       </section>
 
-      <section id="projecten" className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
+      <section id="projecten" className={isWorker ? "grid gap-6" : "grid gap-6 xl:grid-cols-[0.78fr_1.22fr]"}>
         {!isWorker ? (
-          <Panel className="h-fit">
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Werkvloer</p>
-            <h3 className="mt-2 text-2xl font-semibold text-forest">Nieuwe opdracht / dossier</h3>
-            <p className="mt-2 text-sm text-ink/60">Maak eerst een project aan en koppel daarna formulieren aan dat dossier.</p>
-            <div className="mt-5">
-              <ProjectCreateForm tenantId={tenant.id} />
-            </div>
-          </Panel>
-        ) : (
-          <Panel className="h-fit">
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Snelle start</p>
-            <h3 className="mt-2 text-2xl font-semibold text-forest">Wat wil je nu doen?</h3>
-            <div className="mt-5 grid gap-3">
-              <div className="rounded-[22px] border border-line bg-mist/70 p-5">
-                <p className="text-sm font-semibold text-forest">1. Kies een project</p>
-                <p className="mt-2 text-sm text-ink/60">Open eerst het juiste klantproject.</p>
+          <>
+            <Panel className="h-fit">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Werkvloer</p>
+              <h3 className="mt-2 text-2xl font-semibold text-forest">Nieuwe opdracht / dossier</h3>
+              <p className="mt-2 text-sm text-ink/60">Maak eerst een project aan en koppel daarna formulieren aan dat dossier.</p>
+              <div className="mt-5">
+                <ProjectCreateForm tenantId={tenant.id} />
               </div>
-              <div className="rounded-[22px] border border-line bg-mist/70 p-5">
-                <p className="text-sm font-semibold text-forest">2. Open je taak</p>
-                <p className="mt-2 text-sm text-ink/60">Werkplan, inspectie, oplevering of foto-upload.</p>
-              </div>
-              <div className="rounded-[22px] border border-line bg-mist/70 p-5">
-                <p className="text-sm font-semibold text-forest">3. Sla direct op</p>
-                <p className="mt-2 text-sm text-ink/60">Alles blijft gekoppeld aan het juiste project.</p>
-              </div>
-            </div>
-          </Panel>
-        )}
+            </Panel>
 
-        <Panel>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Projecten</p>
-              <h3 className="mt-2 text-2xl font-semibold text-forest">
-                {selectedProject ? "Geselecteerd project" : isWorker ? "Mijn projecten" : "Actieve dossiers"}
-              </h3>
-            </div>
-            {selectedProject ? (
-              <Link href={tenant.id ? `/workspace?tenantId=${tenant.id}` : "/workspace"} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
-                Toon alle projecten
-              </Link>
-            ) : null}
-          </div>
-          <div className="mt-5 grid gap-3">
-            {visibleProjects.length === 0 ? (
-              <div className="rounded-2xl border border-line bg-mist px-4 py-3 text-sm text-ink/60">Nog geen projecten.</div>
-            ) : (
-              visibleProjects.map((project) => (
-                <article key={project.id} className="rounded-[22px] border border-line bg-mist/70 px-4 py-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-forest">{project.clientName}</p>
-                      <p className="text-sm text-ink/60">
-                        {project.siteAddress}, {project.siteCity}
-                      </p>
-                    </div>
-                    <Badge tone={project.safetyStatus}>{project.safetyStatus}</Badge>
-                  </div>
-                  <p className="mt-2 text-sm text-ink/60">Start: {formatDate(project.startDate)} · Status: {project.status}</p>
-                  <p className="mt-3 text-sm text-ink/72">{project.materialSummary || "Nog geen notitie."}</p>
-                  <div className="mt-4">
-                    <Link
-                      href={`/workspace/project/${project.id}`}
-                      className={`inline-flex rounded-full px-4 py-2 text-sm font-semibold ${
-                        isWorker ? "bg-lime text-white" : "border border-line text-ink"
-                      }`}
-                    >
-                      {isWorker ? "Start taken" : "Open project"}
-                    </Link>
-                  </div>
-                </article>
-              ))
-            )}
-          </div>
-        </Panel>
+            <Panel>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Projecten</p>
+                  <h3 className="mt-2 text-2xl font-semibold text-forest">{selectedProject ? "Geselecteerd project" : "Actieve dossiers"}</h3>
+                </div>
+                {selectedProject ? (
+                  <Link href={tenant.id ? `/workspace?tenantId=${tenant.id}` : "/workspace"} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
+                    Toon alle projecten
+                  </Link>
+                ) : null}
+              </div>
+              <div className="mt-5 grid gap-3">
+                {visibleProjects.length === 0 ? (
+                  <div className="rounded-2xl border border-line bg-mist px-4 py-3 text-sm text-ink/60">Nog geen projecten.</div>
+                ) : (
+                  visibleProjects.map((project) => (
+                    <article key={project.id} className="rounded-[22px] border border-line bg-mist/70 px-4 py-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-forest">{project.clientName}</p>
+                          <p className="text-sm text-ink/60">
+                            {project.siteAddress}, {project.siteCity}
+                          </p>
+                        </div>
+                        <Badge tone={project.safetyStatus}>{project.safetyStatus}</Badge>
+                      </div>
+                      <p className="mt-2 text-sm text-ink/60">Start: {formatDate(project.startDate)} · Status: {project.status}</p>
+                      <p className="mt-3 text-sm text-ink/72">{project.materialSummary || "Nog geen notitie."}</p>
+                      <div className="mt-4">
+                        <Link href={`/workspace/project/${project.id}`} className="inline-flex rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink">
+                          Open project
+                        </Link>
+                      </div>
+                    </article>
+                  ))
+                )}
+              </div>
+            </Panel>
+          </>
+        ) : (
+          <WorkerProjectDashboard
+            tenant={tenant}
+            projects={data.projects}
+            moduleBundles={data.moduleBundles}
+            selectedProjectId={selectedProject?.id ?? null}
+          />
+        )}
       </section>
 
       {!isWorker ? (
@@ -144,7 +128,7 @@ export function PackageWorkspace({
               </div>
               <div className="rounded-[22px] border border-line bg-mist/70 p-5">
                 <p className="text-sm font-semibold text-forest">Bedrijfsdocumenten</p>
-                <p className="mt-2 text-sm text-ink/60">RI&E, contracten en certificaten horen bij het bedrijfsaccount en staan centraal opgeslagen.</p>
+                <p className="mt-2 text-sm text-ink/60">RE&I, contracten en certificaten horen bij het bedrijfsaccount en staan centraal opgeslagen.</p>
               </div>
             </div>
           </Panel>
@@ -227,7 +211,7 @@ export function PackageWorkspace({
           <Panel>
             <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Taken</p>
             <h3 className="mt-2 text-2xl font-semibold text-forest">Mijn formulieren</h3>
-            <p className="mt-2 text-sm text-ink/60">Kies hieronder de juiste taak binnen een project en sla hem direct op.</p>
+            <p className="mt-2 text-sm text-ink/60">Deze lijst blijft beschikbaar voor snelle invoer, maar de hoofdflow start nu bovenaan vanuit je projectdashboard.</p>
             <div className="mt-6 grid gap-5">
               {data.moduleBundles.map((bundle) => (
                 <section key={bundle.module.id} className="rounded-[22px] border border-line bg-mist/55 p-5">

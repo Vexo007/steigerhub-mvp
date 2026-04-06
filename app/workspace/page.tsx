@@ -16,6 +16,19 @@ export default async function WorkspacePage({
   const tenantId = user.role === "agency_admin" ? params.tenantId : user.tenantId ?? undefined;
   const data = await getPackageWorkspaceData(tenantId);
   const roleLabel = user.role === "agency_admin" ? "Tenant demo" : user.role === "tenant_admin" ? "Bedrijfsadmin" : "Werkvloer";
+  const navItems =
+    user.role === "tenant_staff"
+      ? [
+          { label: "Overzicht", href: tenantId ? `/workspace?tenantId=${tenantId}` : "/workspace", active: true, caption: "Projecten en taken" },
+          { label: "Projecten", href: tenantId ? `/workspace?tenantId=${tenantId}#projecten` : "/workspace#projecten", caption: "Mijn klanten" },
+          { label: "Taken", href: tenantId ? `/workspace?tenantId=${tenantId}#formulieren` : "/workspace#formulieren", caption: "Formulieren en uploads" }
+        ]
+      : [
+          { label: "Overzicht", href: tenantId ? `/workspace?tenantId=${tenantId}` : "/workspace", active: true, caption: "Dashboard en taken" },
+          { label: "Projecten", href: tenantId ? `/workspace?tenantId=${tenantId}#projecten` : "/workspace#projecten", caption: "Klant en adres" },
+          { label: "Formulieren", href: tenantId ? `/workspace?tenantId=${tenantId}#formulieren` : "/workspace#formulieren", caption: "Invullen en uploaden" },
+          { label: "Bedrijfsprofiel", href: tenantId ? `/workspace?tenantId=${tenantId}#profiel` : "/workspace#profiel", caption: "Logo en RE&I" }
+        ];
 
   return (
     <DashboardShell
@@ -23,12 +36,7 @@ export default async function WorkspacePage({
       brand={data.tenant?.name ?? "SteigerHub"}
       title="Werkprocessen en formulieren"
       subtitle={`Ingelogd als ${user.fullName}. Dit scherm is rustig gehouden voor mobiel gebruik op de werkvloer en duidelijk genoeg voor de eigenaar op desktop.`}
-      navItems={[
-        { label: "Overzicht", href: tenantId ? `/workspace?tenantId=${tenantId}` : "/workspace", active: true, caption: "Dashboard en taken" },
-        { label: "Projecten", href: tenantId ? `/workspace?tenantId=${tenantId}#projecten` : "/workspace#projecten", caption: "Klant en adres" },
-        { label: "Formulieren", href: tenantId ? `/workspace?tenantId=${tenantId}#formulieren` : "/workspace#formulieren", caption: "Invullen en uploaden" },
-        { label: "Bedrijfsprofiel", href: tenantId ? `/workspace?tenantId=${tenantId}#profiel` : "/workspace#profiel", caption: "Logo en RE&I" }
-      ]}
+      navItems={navItems}
       actions={
         <>
           {user.role === "agency_admin" ? (
