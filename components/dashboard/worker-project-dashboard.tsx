@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useState } from "react";
 import { Panel } from "@/components/ui/panel";
 import type { ModuleBundle, Project, Tenant } from "@/lib/types";
@@ -10,7 +11,7 @@ type WorkerAction = {
   key: string;
   label: string;
   caption: string;
-  href: string;
+  href: Route;
 };
 
 function normalize(value: string) {
@@ -35,7 +36,7 @@ function createWorkerActions(project: Project, tenantId: string, moduleBundles: 
       key: "project",
       label: "Project taken",
       caption: "Open alle taken binnen dit project",
-      href: `/workspace/project/${project.id}`
+      href: `/workspace/project/${project.id}` as Route
     }
   ];
 
@@ -44,7 +45,7 @@ function createWorkerActions(project: Project, tenantId: string, moduleBundles: 
       key: "workplan",
       label: "Werkplan",
       caption: "Maak of open een algemeen VGM plan",
-      href: `/workspace/project/${project.id}/workplans`
+      href: `/workspace/project/${project.id}/workplans` as Route
     });
   }
 
@@ -53,7 +54,7 @@ function createWorkerActions(project: Project, tenantId: string, moduleBundles: 
       key: "inspection",
       label: "Keuring",
       caption: "Voer een inspectie of keuring uit",
-      href: `/workspace?tenantId=${tenantId}&projectId=${project.id}#formulieren`
+      href: `/workspace?tenantId=${tenantId}&projectId=${project.id}#formulieren` as Route
     });
   }
 
@@ -62,7 +63,7 @@ function createWorkerActions(project: Project, tenantId: string, moduleBundles: 
       key: "drawing",
       label: "Tekening",
       caption: "Bekijk de projectinformatie en tekeningen",
-      href: `/workspace/project/${project.id}`
+      href: `/workspace/project/${project.id}` as Route
     });
   }
 
@@ -71,7 +72,7 @@ function createWorkerActions(project: Project, tenantId: string, moduleBundles: 
       key: "handover",
       label: "Oplevering",
       caption: "Vul de oplevering van dit project in",
-      href: `/workspace?tenantId=${tenantId}&projectId=${project.id}#formulieren`
+      href: `/workspace?tenantId=${tenantId}&projectId=${project.id}#formulieren` as Route
     });
   }
 
@@ -79,7 +80,7 @@ function createWorkerActions(project: Project, tenantId: string, moduleBundles: 
     key: "forms",
     label: "Formulieren",
     caption: "Open alle formulieren voor dit project",
-    href: `/workspace?tenantId=${tenantId}&projectId=${project.id}#formulieren`
+    href: `/workspace?tenantId=${tenantId}&projectId=${project.id}#formulieren` as Route
   });
 
   return actions;
