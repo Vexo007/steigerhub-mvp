@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmployeeCreateForm } from "@/components/forms/employee-create-form";
 import { AdminDashboardShell } from "@/components/layout/admin-dashboard-shell";
 import { Badge } from "@/components/ui/badge";
@@ -27,11 +28,23 @@ export default async function AdminEmployeesPage({
     >
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <Panel>
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Nieuwe gebruiker</p>
-          <h2 className="mt-2 text-2xl font-semibold text-forest">Manager of werknemer toevoegen</h2>
-          <p className="mt-2 text-sm text-ink/65">De bedrijfsadmin maakt hier medewerkers aan die daarna kunnen inloggen op het eigen account.</p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Nieuwe gebruiker</p>
+              <h2 className="mt-2 text-2xl font-semibold text-forest">Manager of werknemer toevoegen</h2>
+              <p className="mt-2 text-sm text-ink/65">De bedrijfsadmin maakt hier medewerkers aan die daarna kunnen inloggen op het eigen account.</p>
+            </div>
+            {data.tenant ? (
+              <Link
+                href={`/workspace?tenantId=${data.tenant.id}`}
+                className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink"
+              >
+                Werkapp preview
+              </Link>
+            ) : null}
+          </div>
           <div className="mt-5">
-            <EmployeeCreateForm />
+            <EmployeeCreateForm tenantId={data.tenant?.id} />
           </div>
         </Panel>
 

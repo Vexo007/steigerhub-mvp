@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentAppUser } from "@/lib/auth";
+import { getAuthorizedTenantId, getCurrentAppUser } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
@@ -18,6 +18,7 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as {
+    tenantId?: string;
     fullName?: string;
     email?: string;
     role?: "tenant_admin" | "tenant_staff";
@@ -27,7 +28,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Naam, e-mail en rol zijn verplicht." }, { status: 400 });
   }
 
-  const tenantId = actor.tenantId;
+  let tenantId: string | null;
+  try {
+    tenantId = getAuthorizedTenantId(actor, body.tenantId) ?? actor.tenantId;
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Geen toegang tot deze tenant." }, { status: 403 });
+  }
+
   if (!tenantId) {
     return NextResponse.json({ error: "Geen tenant gekoppeld aan deze admin." }, { status: 400 });
   }

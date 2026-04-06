@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function EmployeeCreateForm() {
+export function EmployeeCreateForm({ tenantId }: { tenantId?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +19,7 @@ export function EmployeeCreateForm() {
 
     const formData = new FormData(event.currentTarget);
     const payload = {
+      tenantId,
       fullName: String(formData.get("fullName") ?? ""),
       email: String(formData.get("email") ?? ""),
       role: String(formData.get("role") ?? "tenant_staff")
