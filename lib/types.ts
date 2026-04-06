@@ -28,6 +28,38 @@ export interface EmployeeSummary {
   createdAt: string;
 }
 
+export interface CustomerAccount {
+  id: string;
+  tenantId: string;
+  name: string;
+  status: "lead" | "active" | "archived";
+  notes: string;
+  createdAt: string;
+}
+
+export interface CustomerContact {
+  id: string;
+  tenantId: string;
+  customerId: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  roleLabel: string;
+  isPrimary: boolean;
+}
+
+export interface CustomerAddress {
+  id: string;
+  tenantId: string;
+  customerId: string;
+  label: string;
+  street: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  accessNotes: string;
+}
+
 export interface CompanyProfile {
   tenantId: string;
   displayName: string;
@@ -71,6 +103,8 @@ export interface TenantModuleSetting {
 export interface Project {
   id: string;
   tenantId: string;
+  customerId?: string | null;
+  addressId?: string | null;
   clientName: string;
   siteAddress: string;
   siteCity: string;
@@ -97,6 +131,78 @@ export interface ProjectNote {
   author: string;
   createdAt: string;
   body: string;
+}
+
+export interface ProjectTask {
+  id: string;
+  tenantId: string;
+  projectId: string;
+  assignedTo: string | null;
+  title: string;
+  taskType: string;
+  status: "todo" | "planned" | "in_progress" | "blocked" | "done";
+  priority: "low" | "medium" | "high";
+  dueDate: string | null;
+  notes: string;
+  completedAt: string | null;
+}
+
+export interface ProjectDocument {
+  id: string;
+  tenantId: string;
+  projectId: string | null;
+  customerId: string | null;
+  category: "inspection" | "drawing" | "safety_sheet" | "contract" | "certificate" | "other";
+  title: string;
+  bucketPath: string;
+  fileName: string;
+  expiresAt: string | null;
+  uploadedBy: string | null;
+  createdAt: string;
+}
+
+export interface MaterialItem {
+  id: string;
+  tenantId: string;
+  projectId: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  notes: string;
+}
+
+export interface IncidentReport {
+  id: string;
+  tenantId: string;
+  projectId: string | null;
+  customerId: string | null;
+  title: string;
+  description: string;
+  severity: "low" | "medium" | "high" | "critical";
+  status: "open" | "investigating" | "resolved" | "closed";
+  reportedBy: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface ReminderItem {
+  id: string;
+  tenantId: string;
+  projectId: string | null;
+  taskId: string | null;
+  kind: "expiry" | "inspection" | "follow_up" | "subscription";
+  title: string;
+  dueAt: string;
+  status: "pending" | "sent" | "completed";
+}
+
+export interface AuditEvent {
+  id: string;
+  tenantId: string;
+  action: string;
+  targetTable: string;
+  targetId: string | null;
+  createdAt: string;
 }
 
 export interface CustomFieldDefinition {
@@ -201,6 +307,14 @@ export interface PackageWorkspaceData {
   tenant: Tenant | null;
   packageDefinition: PackageDefinition | null;
   projects: Project[];
+  customers: CustomerAccount[];
+  contacts: CustomerContact[];
+  addresses: CustomerAddress[];
+  projectTasks: ProjectTask[];
+  projectDocuments: ProjectDocument[];
+  materialItems: MaterialItem[];
+  incidents: IncidentReport[];
+  reminders: ReminderItem[];
   moduleBundles: ModuleBundle[];
   recordsByFormId: Record<
     string,
@@ -257,9 +371,18 @@ export interface TenantAdminData {
   tenant: Tenant | null;
   packageDefinition: PackageDefinition | null;
   employees: EmployeeSummary[];
+  customers: CustomerAccount[];
+  contacts: CustomerContact[];
+  addresses: CustomerAddress[];
   projects: Project[];
+  projectTasks: ProjectTask[];
+  projectDocuments: ProjectDocument[];
+  materialItems: MaterialItem[];
+  incidents: IncidentReport[];
+  reminders: ReminderItem[];
+  auditEvents: AuditEvent[];
   companyProfile: CompanyProfile | null;
-  companyDocuments: CompanyDocument[];
+  companyDocuments: CompanyDocument[]; 
   recentSubmissions: Array<{
     id: string;
     formName: string;

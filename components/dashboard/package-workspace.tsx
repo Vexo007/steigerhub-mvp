@@ -111,6 +111,8 @@ export function PackageWorkspace({
             tenant={tenant}
             projects={data.projects}
             moduleBundles={data.moduleBundles}
+            projectTasks={data.projectTasks}
+            reminders={data.reminders}
             selectedProjectId={selectedProject?.id ?? null}
           />
         )}

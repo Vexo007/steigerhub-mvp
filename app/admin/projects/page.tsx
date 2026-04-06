@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProjectCreateForm } from "@/components/forms/project-create-form";
+import { ProjectTaskCreateForm } from "@/components/forms/project-task-create-form";
 import { AdminDashboardShell } from "@/components/layout/admin-dashboard-shell";
 import { Badge } from "@/components/ui/badge";
 import { Panel } from "@/components/ui/panel";
@@ -24,7 +25,7 @@ export default async function AdminProjectsPage({
       tenantId={tenantId}
       currentKey="projects"
       title="Projecten"
-      subtitle="Bekijk en open hier alle klantprojecten. Vanuit elk project ga je door naar taken, formulieren en werkplannen."
+      subtitle="Bekijk projectstatus, taken, documenten en incidenten. Vanuit elk project ga je door naar werkplannen en formulieren."
     >
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <Panel>
@@ -33,6 +34,14 @@ export default async function AdminProjectsPage({
           <p className="mt-2 text-sm text-ink/65">Koppel hier een klant, adres en startdatum zodat het team direct aan de slag kan.</p>
           <div className="mt-5">
             <ProjectCreateForm tenantId={data.tenant?.id ?? ""} />
+          </div>
+          <div className="mt-8 border-t border-line pt-6">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Planning</p>
+            <h3 className="mt-2 text-xl font-semibold text-forest">Taak toewijzen</h3>
+            <p className="mt-2 text-sm text-ink/65">Zet keuringen, opleveringen of werkplanacties meteen op naam van een medewerker.</p>
+            <div className="mt-4">
+              <ProjectTaskCreateForm tenantId={data.tenant?.id ?? ""} projects={data.projects} employees={data.employees} />
+            </div>
           </div>
         </Panel>
 
@@ -46,9 +55,7 @@ export default async function AdminProjectsPage({
           </div>
           <div className="mt-5 grid gap-3">
             {data.projects.length === 0 ? (
-              <div className="rounded-[20px] border border-dashed border-line bg-mist/60 px-4 py-4 text-sm text-ink/60">
-                Nog geen projecten gevonden.
-              </div>
+              <div className="rounded-[20px] border border-dashed border-line bg-mist/60 px-4 py-4 text-sm text-ink/60">Nog geen projecten gevonden.</div>
             ) : (
               data.projects.map((project) => (
                 <div key={project.id} className="rounded-[22px] border border-line bg-mist/60 p-5">
@@ -65,6 +72,11 @@ export default async function AdminProjectsPage({
                     <p>Start: {formatDate(project.startDate)}</p>
                     <p>Status: {project.status}</p>
                     <p>Aangemaakt: {formatDate(project.createdAt)}</p>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-sm text-ink/60 md:grid-cols-3">
+                    <p>{data.projectTasks.filter((task) => task.projectId === project.id && task.status !== "done").length} open taken</p>
+                    <p>{data.projectDocuments.filter((document) => document.projectId === project.id).length} documenten</p>
+                    <p>{data.incidents.filter((incident) => incident.projectId === project.id && incident.status !== "closed").length} incident(en)</p>
                   </div>
                   <p className="mt-4 rounded-[18px] border border-line/70 bg-panel px-4 py-3 text-sm text-ink/70">
                     {project.materialSummary || "Nog geen materiaal- of werknotitie toegevoegd."}

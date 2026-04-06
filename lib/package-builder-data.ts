@@ -2,18 +2,27 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getAgencyDashboardData, getTenantWorkspaceData } from "@/lib/data";
 import type {
+  AuditEvent,
+  CustomerAccount,
+  CustomerAddress,
+  CustomerContact,
   CompanyDocument,
   CompanyProfile,
   DynamicFieldType,
   EmployeeSummary,
   FieldDefinition,
   FormDefinition,
+  IncidentReport,
+  MaterialItem,
   ModuleBundle,
   ModuleDefinition,
   PackageTemplateData,
   PackageDefinition,
+  ProjectDocument,
+  ProjectTask,
   TenantAdminData,
   PackageWorkspaceData,
+  ReminderItem,
   Tenant,
   TenantConfigData
 } from "@/lib/types";
@@ -93,6 +102,110 @@ type CompanyDocumentRow = {
   created_at: string;
 };
 
+type CustomerRow = {
+  id: string;
+  tenant_id: string;
+  name: string;
+  status: CustomerAccount["status"];
+  notes: string;
+  created_at: string;
+};
+
+type CustomerContactRow = {
+  id: string;
+  tenant_id: string;
+  customer_id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  role_label: string;
+  is_primary: boolean;
+};
+
+type CustomerAddressRow = {
+  id: string;
+  tenant_id: string;
+  customer_id: string;
+  label: string;
+  street: string;
+  postal_code: string;
+  city: string;
+  country: string;
+  access_notes: string;
+};
+
+type ProjectTaskRow = {
+  id: string;
+  tenant_id: string;
+  project_id: string;
+  assigned_to: string | null;
+  title: string;
+  task_type: string;
+  status: ProjectTask["status"];
+  priority: ProjectTask["priority"];
+  due_date: string | null;
+  notes: string;
+  completed_at: string | null;
+};
+
+type ProjectDocumentRow = {
+  id: string;
+  tenant_id: string;
+  project_id: string | null;
+  customer_id: string | null;
+  category: ProjectDocument["category"];
+  title: string;
+  bucket_path: string;
+  file_name: string;
+  expires_at: string | null;
+  uploaded_by: string | null;
+  created_at: string;
+};
+
+type MaterialItemRow = {
+  id: string;
+  tenant_id: string;
+  project_id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  notes: string;
+};
+
+type IncidentRow = {
+  id: string;
+  tenant_id: string;
+  project_id: string | null;
+  customer_id: string | null;
+  title: string;
+  description: string;
+  severity: IncidentReport["severity"];
+  status: IncidentReport["status"];
+  reported_by: string | null;
+  created_at: string;
+  resolved_at: string | null;
+};
+
+type ReminderRow = {
+  id: string;
+  tenant_id: string;
+  project_id: string | null;
+  task_id: string | null;
+  kind: ReminderItem["kind"];
+  title: string;
+  due_at: string;
+  status: ReminderItem["status"];
+};
+
+type AuditRow = {
+  id: string;
+  tenant_id: string;
+  action: string;
+  target_table: string;
+  target_id: string | null;
+  created_at: string;
+};
+
 function mapPackage(row: PackageRow): PackageDefinition {
   return {
     id: row.id,
@@ -160,6 +273,206 @@ function mapCompanyDocument(row: CompanyDocumentRow): CompanyDocument {
     fileName: row.file_name,
     uploadedBy: row.uploaded_by,
     createdAt: row.created_at
+  };
+}
+
+function mapCustomer(row: CustomerRow): CustomerAccount {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    name: row.name,
+    status: row.status,
+    notes: row.notes,
+    createdAt: row.created_at
+  };
+}
+
+function mapCustomerContact(row: CustomerContactRow): CustomerContact {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    customerId: row.customer_id,
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    roleLabel: row.role_label,
+    isPrimary: row.is_primary
+  };
+}
+
+function mapCustomerAddress(row: CustomerAddressRow): CustomerAddress {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    customerId: row.customer_id,
+    label: row.label,
+    street: row.street,
+    postalCode: row.postal_code,
+    city: row.city,
+    country: row.country,
+    accessNotes: row.access_notes
+  };
+}
+
+function mapProjectTask(row: ProjectTaskRow): ProjectTask {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    projectId: row.project_id,
+    assignedTo: row.assigned_to,
+    title: row.title,
+    taskType: row.task_type,
+    status: row.status,
+    priority: row.priority,
+    dueDate: row.due_date,
+    notes: row.notes,
+    completedAt: row.completed_at
+  };
+}
+
+function mapProjectDocument(row: ProjectDocumentRow): ProjectDocument {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    projectId: row.project_id,
+    customerId: row.customer_id,
+    category: row.category,
+    title: row.title,
+    bucketPath: row.bucket_path,
+    fileName: row.file_name,
+    expiresAt: row.expires_at,
+    uploadedBy: row.uploaded_by,
+    createdAt: row.created_at
+  };
+}
+
+function mapMaterialItem(row: MaterialItemRow): MaterialItem {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    projectId: row.project_id,
+    name: row.name,
+    quantity: row.quantity,
+    unit: row.unit,
+    notes: row.notes
+  };
+}
+
+function mapIncident(row: IncidentRow): IncidentReport {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    projectId: row.project_id,
+    customerId: row.customer_id,
+    title: row.title,
+    description: row.description,
+    severity: row.severity,
+    status: row.status,
+    reportedBy: row.reported_by,
+    createdAt: row.created_at,
+    resolvedAt: row.resolved_at
+  };
+}
+
+function mapReminder(row: ReminderRow): ReminderItem {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    projectId: row.project_id,
+    taskId: row.task_id,
+    kind: row.kind,
+    title: row.title,
+    dueAt: row.due_at,
+    status: row.status
+  };
+}
+
+function mapAuditEvent(row: AuditRow): AuditEvent {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    action: row.action,
+    targetTable: row.target_table,
+    targetId: row.target_id,
+    createdAt: row.created_at
+  };
+}
+
+async function safeSelect<T>(query: Promise<{ data: T[] | null; error?: { message?: string } | null }>): Promise<T[]> {
+  const result = await query;
+  if (result.error) {
+    return [];
+  }
+
+  return result.data ?? [];
+}
+
+async function getTenantOperationsData(tenantId: string) {
+  const supabase = createSupabaseAdminClient();
+
+  if (!supabase) {
+    return {
+      customers: [] as CustomerAccount[],
+      contacts: [] as CustomerContact[],
+      addresses: [] as CustomerAddress[],
+      projectTasks: [] as ProjectTask[],
+      projectDocuments: [] as ProjectDocument[],
+      materialItems: [] as MaterialItem[],
+      incidents: [] as IncidentReport[],
+      reminders: [] as ReminderItem[],
+      auditEvents: [] as AuditEvent[]
+    };
+  }
+
+  const db = supabase as any;
+  const [customerRows, contactRows, addressRows, taskRows, documentRows, materialRows, incidentRows, reminderRows, auditRows] = await Promise.all([
+    safeSelect<CustomerRow>(db.from("customers").select("id,tenant_id,name,status,notes,created_at").eq("tenant_id", tenantId).order("created_at", { ascending: false })),
+    safeSelect<CustomerContactRow>(
+      db.from("customer_contacts").select("id,tenant_id,customer_id,full_name,email,phone,role_label,is_primary").eq("tenant_id", tenantId)
+    ),
+    safeSelect<CustomerAddressRow>(
+      db.from("customer_addresses").select("id,tenant_id,customer_id,label,street,postal_code,city,country,access_notes").eq("tenant_id", tenantId)
+    ),
+    safeSelect<ProjectTaskRow>(
+      db
+        .from("project_tasks")
+        .select("id,tenant_id,project_id,assigned_to,title,task_type,status,priority,due_date,notes,completed_at")
+        .eq("tenant_id", tenantId)
+        .order("due_date", { ascending: true })
+    ),
+    safeSelect<ProjectDocumentRow>(
+      db
+        .from("project_documents")
+        .select("id,tenant_id,project_id,customer_id,category,title,bucket_path,file_name,expires_at,uploaded_by,created_at")
+        .eq("tenant_id", tenantId)
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect<MaterialItemRow>(db.from("project_material_items").select("id,tenant_id,project_id,name,quantity,unit,notes").eq("tenant_id", tenantId)),
+    safeSelect<IncidentRow>(
+      db
+        .from("project_incidents")
+        .select("id,tenant_id,project_id,customer_id,title,description,severity,status,reported_by,created_at,resolved_at")
+        .eq("tenant_id", tenantId)
+        .order("created_at", { ascending: false })
+    ),
+    safeSelect<ReminderRow>(
+      db.from("reminders").select("id,tenant_id,project_id,task_id,kind,title,due_at,status").eq("tenant_id", tenantId).order("due_at")
+    ),
+    safeSelect<AuditRow>(
+      db.from("audit_logs").select("id,tenant_id,action,target_table,target_id,created_at").eq("tenant_id", tenantId).order("created_at", { ascending: false }).limit(20)
+    )
+  ]);
+
+  return {
+    customers: customerRows.map(mapCustomer),
+    contacts: contactRows.map(mapCustomerContact),
+    addresses: addressRows.map(mapCustomerAddress),
+    projectTasks: taskRows.map(mapProjectTask),
+    projectDocuments: documentRows.map(mapProjectDocument),
+    materialItems: materialRows.map(mapMaterialItem),
+    incidents: incidentRows.map(mapIncident),
+    reminders: reminderRows.map(mapReminder),
+    auditEvents: auditRows.map(mapAuditEvent)
   };
 }
 
@@ -317,6 +630,14 @@ export async function getPackageWorkspaceData(tenantId?: string): Promise<Packag
       tenant,
       packageDefinition: null,
       projects: workspace.projects,
+      customers: [],
+      contacts: [],
+      addresses: [],
+      projectTasks: [],
+      projectDocuments: [],
+      materialItems: [],
+      incidents: [],
+      reminders: [],
       moduleBundles: [],
       recordsByFormId: {}
     };
@@ -326,10 +647,20 @@ export async function getPackageWorkspaceData(tenantId?: string): Promise<Packag
   const formIds = config.moduleBundles.flatMap((bundle) => bundle.forms.map((item) => item.form.id));
 
   if (formIds.length === 0) {
+    const operations = await getTenantOperationsData(tenant.id);
+
     return {
       tenant,
       packageDefinition: config.packageDefinition,
       projects: workspace.projects,
+      customers: operations.customers,
+      contacts: operations.contacts,
+      addresses: operations.addresses,
+      projectTasks: operations.projectTasks,
+      projectDocuments: operations.projectDocuments,
+      materialItems: operations.materialItems,
+      incidents: operations.incidents,
+      reminders: operations.reminders,
       moduleBundles: config.moduleBundles,
       recordsByFormId: {}
     };
@@ -383,11 +714,20 @@ export async function getPackageWorkspaceData(tenantId?: string): Promise<Packag
         }))
     ])
   ) as PackageWorkspaceData["recordsByFormId"];
+  const operations = await getTenantOperationsData(tenant.id);
 
   return {
     tenant,
     packageDefinition: config.packageDefinition,
     projects: workspace.projects,
+    customers: operations.customers,
+    contacts: operations.contacts,
+    addresses: operations.addresses,
+    projectTasks: operations.projectTasks,
+    projectDocuments: operations.projectDocuments,
+    materialItems: operations.materialItems,
+    incidents: operations.incidents,
+    reminders: operations.reminders,
     moduleBundles: config.moduleBundles,
     recordsByFormId
   };
@@ -403,7 +743,16 @@ export async function getTenantAdminData(tenantId?: string): Promise<TenantAdmin
       tenant,
       packageDefinition: workspace.packageDefinition,
       employees: [],
+      customers: [],
+      contacts: [],
+      addresses: [],
       projects: workspace.projects,
+      projectTasks: [],
+      projectDocuments: [],
+      materialItems: [],
+      incidents: [],
+      reminders: [],
+      auditEvents: [],
       companyProfile: null,
       companyDocuments: [],
       recentSubmissions: []
@@ -470,12 +819,22 @@ export async function getTenantAdminData(tenantId?: string): Promise<TenantAdmin
     createdAt: record.created_at,
     status: record.status
   }));
+  const operations = await getTenantOperationsData(tenant.id);
 
   return {
     tenant,
     packageDefinition: workspace.packageDefinition,
     employees,
+    customers: operations.customers,
+    contacts: operations.contacts,
+    addresses: operations.addresses,
     projects: workspace.projects,
+    projectTasks: operations.projectTasks,
+    projectDocuments: operations.projectDocuments,
+    materialItems: operations.materialItems,
+    incidents: operations.incidents,
+    reminders: operations.reminders,
+    auditEvents: operations.auditEvents,
     companyProfile: companyProfileRow ? mapCompanyProfile(companyProfileRow as CompanyProfileRow) : null,
     companyDocuments: ((companyDocumentRows ?? []) as CompanyDocumentRow[]).map(mapCompanyDocument),
     recentSubmissions

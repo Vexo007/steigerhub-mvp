@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useState } from "react";
 import { Panel } from "@/components/ui/panel";
-import type { ModuleBundle, Project, Tenant } from "@/lib/types";
+import type { ModuleBundle, Project, ProjectTask, ReminderItem, Tenant } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 
 type WorkerAction = {
@@ -90,11 +90,15 @@ export function WorkerProjectDashboard({
   tenant,
   projects,
   moduleBundles,
+  projectTasks,
+  reminders,
   selectedProjectId
 }: {
   tenant: Tenant;
   projects: Project[];
   moduleBundles: ModuleBundle[];
+  projectTasks: ProjectTask[];
+  reminders: ReminderItem[];
   selectedProjectId?: string | null;
 }) {
   const [search, setSearch] = useState("");
@@ -107,6 +111,8 @@ export function WorkerProjectDashboard({
 
   const activeProject = filteredProjects.find((project) => project.id === activeProjectId) ?? filteredProjects[0] ?? null;
   const actions = activeProject ? createWorkerActions(activeProject, tenant.id, moduleBundles) : [];
+  const todaysTasks = projectTasks.filter((task) => task.status !== "done").slice(0, 4);
+  const upcomingReminders = reminders.filter((reminder) => reminder.status !== "completed").slice(0, 3);
 
   return (
     <div className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
@@ -186,6 +192,30 @@ export function WorkerProjectDashboard({
           ) : (
             <div className="mt-4 rounded-[20px] bg-white/8 p-4 text-sm text-white/72">Kies links eerst een project.</div>
           )}
+        </Panel>
+
+        <Panel className="p-5 sm:p-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink/45">Vandaag</p>
+          <h3 className="mt-2 text-2xl font-semibold text-forest">Mijn taken vandaag</h3>
+          <div className="mt-5 grid gap-3">
+            {todaysTasks.map((task) => (
+              <div key={task.id} className="rounded-[20px] border border-line bg-mist/60 px-4 py-4">
+                <p className="font-semibold text-forest">{task.title}</p>
+                <p className="mt-1 text-sm text-ink/60">{task.taskType} · prioriteit {task.priority}</p>
+              </div>
+            ))}
+            {upcomingReminders.map((reminder) => (
+              <div key={reminder.id} className="rounded-[20px] border border-line bg-panel px-4 py-4">
+                <p className="font-semibold text-forest">{reminder.title}</p>
+                <p className="mt-1 text-sm text-ink/60">{reminder.kind} · {formatDate(reminder.dueAt)}</p>
+              </div>
+            ))}
+            {todaysTasks.length === 0 && upcomingReminders.length === 0 ? (
+              <div className="rounded-[20px] border border-dashed border-line bg-mist px-4 py-4 text-sm text-ink/60">
+                Geen directe taken ingepland. Kies hieronder een project om aan te werken.
+              </div>
+            ) : null}
+          </div>
         </Panel>
 
         <Panel className="p-5 sm:p-6">
