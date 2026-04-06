@@ -40,7 +40,7 @@ export default async function WorkspacePage({
         </>
       }
     >
-      <PackageWorkspace data={data} selectedProjectId={params.projectId ?? null} />
+      <PackageWorkspace data={data} selectedProjectId={params.projectId ?? null} userRole={user.role} />
     </DashboardShell>
   );
 }

@@ -200,10 +200,38 @@ export async function getWorkplanDetail(user: AppUser, workplanId: string): Prom
     .eq("workplan_id", workplanId)
     .order("updated_at", { ascending: true });
 
+  const mappedSections = ((sectionRows ?? []) as WorkplanSectionRow[]).map(mapWorkplanSection);
+
+  if (supabase) {
+    for (const section of mappedSections) {
+      const payload = section.payload as Record<string, unknown>;
+      const uploads = Array.isArray(payload.uploadedFiles)
+        ? (payload.uploadedFiles as Array<{ path: string; fileName: string; uploadedAt?: string }>)
+        : [];
+
+      if (uploads.length > 0) {
+        const signedUploads = await Promise.all(
+          uploads.map(async (upload) => {
+            const { data: signedFile } = await supabase.storage.from("tenant-files").createSignedUrl(upload.path, 60 * 60);
+            return {
+              ...upload,
+              signedUrl: signedFile?.signedUrl ?? "#"
+            };
+          })
+        );
+
+        section.payload = {
+          ...payload,
+          uploadedFiles: signedUploads
+        };
+      }
+    }
+  }
+
   return {
     tenant: workspace.tenant,
     project,
     workplan: mappedWorkplan,
-    sections: ((sectionRows ?? []) as WorkplanSectionRow[]).map(mapWorkplanSection)
+    sections: mappedSections
   };
 }

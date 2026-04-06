@@ -46,6 +46,9 @@ export default async function WorkplanDetailPage({
         <WorkplanDetailShell
           workplanId={workplanId}
           sections={data.sections}
+          previewHref={`/workspace/project/${projectId}/workplans/${workplanId}/preview`}
+          pdfHref={`/workspace/project/${projectId}/workplans/${workplanId}/preview?print=1`}
+          wordHref={`/api/workplans/${workplanId}/export?format=word`}
           projectDefaults={{
             titel: data.workplan.title,
             opdrachtgever: data.project.clientName,

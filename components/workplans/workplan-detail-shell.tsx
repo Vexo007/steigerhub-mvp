@@ -22,11 +22,17 @@ function sectionCompletion(section: ProjectWorkplanSection | null | undefined) {
 export function WorkplanDetailShell({
   workplanId,
   sections,
-  projectDefaults
+  projectDefaults,
+  previewHref,
+  pdfHref,
+  wordHref
 }: {
   workplanId: string;
   sections: ProjectWorkplanSection[];
   projectDefaults?: Record<string, string>;
+  previewHref?: string;
+  pdfHref?: string;
+  wordHref?: string;
 }) {
   const [activeSection, setActiveSection] = useState<WorkplanSectionKey>("algemeen");
 
@@ -135,6 +141,9 @@ export function WorkplanDetailShell({
             title={current.title}
             initialSection={initialSection}
             projectDefaults={projectDefaults}
+            previewHref={previewHref}
+            pdfHref={pdfHref}
+            wordHref={wordHref}
             onPrevious={activeIndex > 0 ? () => setActiveSection(workplanSections[activeIndex - 1].key) : undefined}
             onNext={activeIndex < workplanSections.length - 1 ? () => setActiveSection(workplanSections[activeIndex + 1].key) : undefined}
             canGoPrevious={activeIndex > 0}

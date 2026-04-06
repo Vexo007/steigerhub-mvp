@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { WorkplanSectionUploadForm } from "@/components/workplans/workplan-section-upload-form";
 import type { ProjectWorkplanSection } from "@/lib/types";
 import { getWorkplanSectionFields, type WorkplanSectionKey } from "@/lib/workplans";
 
@@ -16,6 +17,9 @@ export function WorkplanSectionForm({
   title,
   initialSection,
   projectDefaults,
+  previewHref,
+  pdfHref,
+  wordHref,
   onPrevious,
   onNext,
   canGoPrevious,
@@ -26,6 +30,9 @@ export function WorkplanSectionForm({
   title: string;
   initialSection?: ProjectWorkplanSection | null;
   projectDefaults?: Record<string, string>;
+  previewHref?: string;
+  pdfHref?: string;
+  wordHref?: string;
   onPrevious?: () => void;
   onNext?: () => void;
   canGoPrevious?: boolean;
@@ -38,6 +45,9 @@ export function WorkplanSectionForm({
   const [submitMode, setSubmitMode] = useState<"save" | "next">("save");
   const payload = initialSection?.payload ?? {};
   const fields = getWorkplanSectionFields(sectionKey);
+  const uploadedFiles = Array.isArray(payload.uploadedFiles)
+    ? (payload.uploadedFiles as Array<{ path: string; fileName: string; uploadedAt?: string; signedUrl?: string }>)
+    : [];
 
   const groupedFields = useMemo(() => {
     return fields.reduce<Record<string, typeof fields>>((acc, field) => {
@@ -93,15 +103,25 @@ export function WorkplanSectionForm({
           Wanneer alle secties zijn ingevuld, kun je hieronder een documentvoorbeeld openen of later exporteren.
         </div>
         <div className="grid gap-3 md:grid-cols-3">
-          <button type="button" className="rounded-2xl bg-forest px-5 py-4 text-sm font-semibold text-white shadow-soft">
+          <a
+            href={previewHref ?? "#"}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-2xl bg-forest px-5 py-4 text-center text-sm font-semibold text-white shadow-soft"
+          >
             HTML preview
-          </button>
-          <button type="button" className="rounded-2xl border border-line bg-white px-5 py-4 text-sm font-semibold text-ink shadow-soft">
-            PDF document
-          </button>
-          <button type="button" className="rounded-2xl border border-line bg-white px-5 py-4 text-sm font-semibold text-ink shadow-soft">
+          </a>
+          <a
+            href={pdfHref ?? "#"}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-2xl border border-line bg-white px-5 py-4 text-center text-sm font-semibold text-ink shadow-soft"
+          >
+            PDF / print
+          </a>
+          <a href={wordHref ?? "#"} className="rounded-2xl border border-line bg-white px-5 py-4 text-center text-sm font-semibold text-ink shadow-soft">
             Word document
-          </button>
+          </a>
         </div>
         <div className="flex flex-wrap gap-3 pt-2">
           <button
@@ -163,6 +183,13 @@ export function WorkplanSectionForm({
           </div>
         </section>
       ))}
+
+      <WorkplanSectionUploadForm
+        workplanId={workplanId}
+        sectionKey={sectionKey}
+        title={title}
+        existingFiles={uploadedFiles}
+      />
 
       <div className="flex flex-wrap items-center gap-3 rounded-[22px] border border-line bg-panel px-5 py-4">
         <button
